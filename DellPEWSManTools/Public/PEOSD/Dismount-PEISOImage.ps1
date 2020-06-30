@@ -1,32 +1,34 @@
 ﻿<#
-Detach-PEDriverPack.ps1 - Detach a PE driver pack.
+Detach-PEISOImage.ps1 - Detach ISO image
 
 _author_ = Ravikanth Chaganti <Ravikanth_Chaganti@Dell.com>
-_version_ = 1.0.0.0
+_version_ = 1.0.0.1
 
 Copyright (c) 2017, Dell, Inc.
 
 This software is licensed to you under the GNU General Public License, version 2 (GPLv2). There is NO WARRANTY for this software, express or implied, including the implied warranties of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. You should have received a copy of GPLv2 along with this software; if not, see http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 #>
-Function Detach-PEDriverPack {
+
+function Dismount-PEISOImage
+{
     [CmdletBinding()]
-    Param (
-        [Parameter(Mandatory, 
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
-                   ValueFromRemainingArguments=$false
-        )]
+    param (
+        [Parameter(Mandatory)]
         [Alias("s")]
+        [ValidateNotNullOrEmpty()]
         $iDRACSession
     )
 
-    Begin {
+    Begin
+    {
         $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_OSDeploymentService";Name="DCIM:OSDeploymentService";}
         $instance = New-CimInstance -ClassName DCIM_OSDeploymentService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
     }
 
-    Process {
-        $result = Invoke-CimMethod -InputObject $instance -MethodName DetachDrivers -CimSession $iDRACSession
-        return $result
+    Process
+    {
+        Invoke-CimMethod -InputObject $instance -CimSession $iDRACSession -MethodName DetachISOImage
     }
 }
+
+set-alias -name Detach-PEISOImage -value Dismount-PEISOImage
