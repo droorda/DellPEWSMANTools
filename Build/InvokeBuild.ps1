@@ -48,12 +48,12 @@ task Init {
 task Test Init, {
     $lines
 
-    foreach ($TestType in @('Unit','Integration')) 
+    foreach ($TestType in @('Unit','Integration'))
     {
         "`n`tSTATUS: $TestType testing with PowerShell $PSVersion"
         $TestFile = "{0}_{1}" -f $TestType, $TestFileFormat
 
-        if (Test-Path -Path "$ProjectRoot\Tests\$TestType") 
+        if (Test-Path -Path "$ProjectRoot\Tests\$TestType")
         {
             # Gather test results. Store them in a variable and file
             $TestResults = Invoke-Pester -Path "$ProjectRoot\Tests\$TestType" -PassThru -OutputFormat NUnitXml -OutputFile "$ProjectRoot\$TestFile"
@@ -82,7 +82,7 @@ task Test Init, {
 
 task Build Test, {
     $lines
-    
+
     Set-Location $ProjectRoot
     # Load the module, read the exported functions, update the psd1 FunctionsToExport
     Set-ModuleFunctions

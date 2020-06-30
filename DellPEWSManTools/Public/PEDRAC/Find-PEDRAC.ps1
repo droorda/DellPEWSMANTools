@@ -49,19 +49,19 @@ Function Find-PEDRAC
     {
         function Find-PEDRAC_
         {
-            [CmdletBinding(DefaultParameterSetName='General', 
+            [CmdletBinding(DefaultParameterSetName='General',
                           PositionalBinding=$false,
                           SupportsShouldProcess=$true)]
             [OutputType([System.Collections.Hashtable])]
-            # Suppressing the vars assignment rule because of the below bugs in the PSScriptAnalyzer v1.15.0     
+            # Suppressing the vars assignment rule because of the below bugs in the PSScriptAnalyzer v1.15.0
             # https://github.com/PowerShell/PSScriptAnalyzer/issues/711
             # https://github.com/PowerShell/PSScriptAnalyzer/issues/699
             [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments',
                  '', Scope='Function')]
             Param
             (
-                #ipStartRange 
-                [Parameter(Mandatory, 
+                #ipStartRange
+                [Parameter(Mandatory,
                            ParameterSetName='General')]
                 [ValidateScript({[System.Net.IPAddress]::TryParse($_,[ref]$null)})]
                 [Alias ("ips")]
@@ -69,15 +69,15 @@ Function Find-PEDRAC
                 $ipStartRange,
 
                 # ipEndRange
-                [Parameter(Mandatory, 
+                [Parameter(Mandatory,
                            ParameterSetName='General')]
                 [ValidateScript({[System.Net.IPAddress]::TryParse($_,[ref]$null)})]
                 [Alias ("ipe")]
                 [String]
                 $ipEndRange,
-        
+
                 # Credential
-                [Parameter(Mandatory=$true, 
+                [Parameter(Mandatory=$true,
                            ParameterSetName='General')]
                 [Alias ("cred")]
                 [PSCredential]
@@ -127,9 +127,9 @@ Function Find-PEDRAC
                             try
                             {
                                 [xml]$result = winrm id -u:$_.GetNetworkCredential().UserName -p:$_.GetNetworkCredential().Password -r:https://$ip/wsman -SkipCNCheck -SkipCACheck -encoding:utf-8 -a:basic -format:pretty 2>&1
-                
+
                                 if (
-                                    ($result.ChildNodes[0].ProductName -eq "iDRAC") -or 
+                                    ($result.ChildNodes[0].ProductName -eq "iDRAC") -or
                                     ($result.ChildNodes[0].ProductName -eq "Integrated Dell Remote Access Controller")
                                 )
                                 {
@@ -170,26 +170,26 @@ Function Find-PEDRAC
                                     }
                                     $finalresultList
                                     break
-                                } 
+                                }
                             }
-                            catch 
+                            catch
                             {
                                 Write-Verbose "No iDRAC found at $ip"
                             }
-                        } 
+                        }
                     }
-                    $jobs=@() 
+                    $jobs=@()
                     $ipList | ForEach-Object {
                         $running = @(Get-Job | Where-Object { $_.State -eq 'Running' })
-                        if ($running.Count -ge 10) 
+                        if ($running.Count -ge 10)
                         {
                             $running | Wait-Job -Any | Out-Null
                         }
-                        Write-Verbose "Discovering ip $_"      
+                        Write-Verbose "Discovering ip $_"
                         $jobs += Start-Job -ScriptBlock $cmd -ArgumentList $_, $credential, $deepDiscover
-                    } 
-                    Wait-Job -Job $jobs | Out-Null 
-                    Receive-Job -Job $jobs 
+                    }
+                    Wait-Job -Job $jobs | Out-Null
+                    Receive-Job -Job $jobs
                 }
             }
         }
@@ -200,7 +200,7 @@ Function Find-PEDRAC
         if( $null -eq $Credential.GetNetworkCredential().Password)
         {
             Throw "Password cannot be empty"
-        }        
+        }
     }
     Process
     {
