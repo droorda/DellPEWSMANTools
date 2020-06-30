@@ -96,8 +96,8 @@ function Set-PEBIOSAttribute
             }
             else
             {
-                write-Verbose "Get-PEBIOSAttribute -iDRACSession $iDRACSession -AttributeName $AttributeName -Verbose"
-                write-Verbose "$(Get-PEBIOSAttribute -iDRACSession $iDRACSession -AttributeName $AttributeName -Verbose)"
+                Write-Verbose "Get-PEBIOSAttribute -iDRACSession $iDRACSession -AttributeName $AttributeName -Verbose"
+                Write-Verbose "$(Get-PEBIOSAttribute -iDRACSession $iDRACSession -AttributeName $AttributeName -Verbose)"
                 Write-Error -Message "${AttributeName} does not exist in PEBIOS attributes."
             }
         }
