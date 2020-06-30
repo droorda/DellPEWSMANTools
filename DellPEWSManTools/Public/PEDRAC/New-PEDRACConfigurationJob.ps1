@@ -21,9 +21,8 @@ Function New-PEDRACConfigurationJob
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
-        [Parameter(Mandatory, 
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
+        [Parameter(ValueFromPipeline=$true,
+                   ValueFromPipelineByPropertyName=$true,
                    ValueFromRemainingArguments=$false,
                    ParameterSetName='General')]
         [Parameter(ParameterSetName='Passthru')]
