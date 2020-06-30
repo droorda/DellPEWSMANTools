@@ -9,7 +9,7 @@ This software is licensed to you under the GNU General Public License, version 2
 #>
 function Get-PEDRACUser
 {
-    [CmdletBinding(DefaultParameterSetName='General',  
+    [CmdletBinding(DefaultParameterSetName='General', 
                   PositionalBinding=$false)]
     [OutputType([System.Collections.HashTable])]
     Param
@@ -19,7 +19,7 @@ function Get-PEDRACUser
                    Position=0,
                    ParameterSetName='General')]
         [ValidateNotNullOrEmpty()]
-        [Alias("s")] 
+        [Alias("s")]
         $iDRACSession
     )
 
@@ -32,7 +32,7 @@ function Get-PEDRACUser
         Write-Verbose "Retrieving iDRAC User Details for $($iDRACsession.ComputerName)"
         Try{
             $map = @{}
-            $users = 1..16 | Foreach-Object -Process {"User"+$_} 
+            $users = 1..16 | Foreach-Object -Process {"User"+$_}
             foreach ($user in $users)
             {
                 $map.$user = @{"Privilege"="";"Enable"="";"UserName"=""}
@@ -71,9 +71,9 @@ function Get-PEDRACUser
             Write-Verbose "iDRAC User Details for $($iDRACsession.ComputerName) retrieved successfully"
 
             $map
-        } 
+        }
 
-        Catch 
+        Catch
         {
             Throw "iDRAC User Details for $($iDRACsession.ComputerName) could not be retrieved"
         }

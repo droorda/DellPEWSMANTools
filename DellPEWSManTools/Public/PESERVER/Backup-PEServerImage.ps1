@@ -8,7 +8,7 @@ Copyright (c) 2017, Dell, Inc.
 
 This software is licensed to you under the GNU General Public License, version 2 (GPLv2). There is NO WARRANTY for this software, express or implied, including the implied warranties of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. You should have received a copy of GPLv2 along with this software; if not, see http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 #>
-function Backup-PEServerImage 
+function Backup-PEServerImage
 {
     [CmdletBinding(DefaultParameterSetName='General')]
     Param
@@ -18,13 +18,13 @@ function Backup-PEServerImage
         [Alias("s")]
         [Parameter(Mandatory,
                    ParameterSetName='Passthru')]
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ParameterSetName='Wait')]
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ParameterSetName='Share')]
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ParameterSetName='ShareWait')]
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ParameterSetName='SharePassThru')]
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
@@ -97,16 +97,16 @@ function Backup-PEServerImage
         [Switch]$Wait
     )
 
-    Begin 
+    Begin
     {
         $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_LCService";Name="DCIM:LCService";}
         $instance = New-CimInstance -ClassName DCIM_LCService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
 
-        if ($Share) 
+        if ($Share)
         {
             $Parameters = $ShareObject.Clone()
-        } 
-        else 
+        }
+        else
         {
             $Parameters = @{
                 IPAddress = $IPAddress
@@ -115,47 +115,47 @@ function Backup-PEServerImage
                 SheduledStartTime = $ScheduledStartTime
             }
 
-            if ($Credential) 
+            if ($Credential)
             {
                 $Parameters.Add('Username',$Credential.GetNetworkCredential().UserName)
                 $Parameters.Add('Password',$Credential.GetNetworkCredential().Password)
-                if ($Credential.GetNetworkCredential().Domain) 
+                if ($Credential.GetNetworkCredential().Domain)
                 {
                     $Parameters.Add('Workgroup',$Credential.GetNetworkCredential().Domain)
                 }
             }
         }
 
-        if ($Passphrase) 
+        if ($Passphrase)
         {
             # Passphrase is a secure string, hence this needs to be done to pass it in plain text
             $tempCred = New-Object -TypeName PSCredential -ArgumentList 'temp',$Passphrase
             $Parameters.Add('Passphrase', $($tempCred.GetNetworkCredential().Password))
         }
 
-        if ($UntilTime) 
+        if ($UntilTime)
         {
             $Parameters.Add('Untiltime',$UntilTime)
         }
 
     }
 
-    Process 
+    Process
     {
-        if (-not $ImageName) 
+        if (-not $ImageName)
         {
             $ImageName = "$($iDRACSession.Computername)-Image.img"
         }
         Write-Verbose "Server image will be backed up as ${ImageName}"
         $Parameters.Add('ImageName',$ImageName)
         $job = Invoke-CimMethod -InputObject $instance -MethodName BackupImage -CimSession $iDRACSession -Arguments $Parameters
-        if ($Job.ReturnValue -eq 4096) 
+        if ($Job.ReturnValue -eq 4096)
         {
-            if ($Passthru) 
+            if ($Passthru)
             {
                 $job
-            } 
-            elseif ($Wait) 
+            }
+            elseif ($Wait)
             {
                 Wait-PEConfigurationJob -iDRACSession $iDRACSession -JobID $job.Job.EndpointReference.InstanceID -Activity "backup System image for $($iDRACSession.ComputerName)"
             }
@@ -164,6 +164,6 @@ function Backup-PEServerImage
         {
             Throw "Job Creation failed with error: $($Job.Message)"
         }
-        
+
     }
 }

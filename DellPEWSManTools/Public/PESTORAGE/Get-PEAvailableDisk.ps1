@@ -26,7 +26,7 @@ Function Get-PEAvailableDisk
         $DiskEncrypt
     )
 
-    Process 
+    Process
     {
         Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_PhysicalDiskView -Namespace 'root/dcim'
     }

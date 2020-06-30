@@ -54,7 +54,7 @@ function New-PEDRACSession
             Encoding = 'Utf8'
             UseSsl = $true
         }
-        if ($IPAddress -or $IgnoreCertFailures) 
+        if ($IPAddress -or $IgnoreCertFailures)
         {
             $Params.SkipCACheck = $true
             $Params.SkipCNCheck = $true

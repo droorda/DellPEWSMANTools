@@ -14,17 +14,17 @@ function Set-PECommonADSetting
                     ConfirmImpact='low')]
     Param
     (
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    Position=0,
                    ParameterSetName='General')]
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    Position=0,
                    ParameterSetName='Wait')]
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    Position=0,
                    ParameterSetName='Passthru')]
         [ValidateNotNullOrEmpty()]
-        [Alias("s")] 
+        [Alias("s")]
         $iDRACSession,
 
         [Parameter(ParameterSetName='General')]
@@ -97,17 +97,17 @@ function Set-PECommonADSetting
 
     Begin
     {
-        if ($enableCertificateValidation -and $disableCertificateValidation) 
+        if ($enableCertificateValidation -and $disableCertificateValidation)
         {
             Throw "ERROR: Enable and Disable Certificate Validation cannot be true at the same time."
         }
-    
-        if ($enableAD -and $disableAD) 
+
+        if ($enableAD -and $disableAD)
         {
             Throw "ERROR: Enable and Disable Active Directory cannot be true at the same time."
         }
         $properties=@{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_iDRACCardService";Name="DCIM:iDRACCardService";}
-        $instance = New-CimInstance -ClassName DCIM_iDRACCardService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties 
+        $instance = New-CimInstance -ClassName DCIM_iDRACCardService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
 
         $params=@{Target="iDRAC.Embedded.1"}
 
@@ -115,27 +115,27 @@ function Set-PECommonADSetting
         $params.AttributeValue=@()
 
         $blankInput = $true
-    
-        if ($enableCertificateValidation) 
+
+        if ($enableCertificateValidation)
         {
             $params.AttributeName += "ActiveDirectory.1#CertValidationEnable"
             $params.AttributeValue += "Enabled"
             $blankInput = $false
-        } 
+        }
 
-        if ($disableCertificateValidation) 
+        if ($disableCertificateValidation)
         {
             $params.AttributeName += "ActiveDirectory.1#CertValidationEnable"
             $params.AttributeValue += "Disabled"
             $blankInput = $false
         }
-    
-        if ($enableAD) 
+
+        if ($enableAD)
         {
             $params.AttributeName += "ActiveDirectory.1#Enable"
             $params.AttributeValue += "Enabled"
             $blankInput = $false
-        } 
+        }
 
         if ($disableAD) {
             $params.AttributeName += "ActiveDirectory.1#Enable"
@@ -144,28 +144,28 @@ function Set-PECommonADSetting
         }
 
 
-        if ($domainControllerServerAddress1) 
+        if ($domainControllerServerAddress1)
         {
             $params.AttributeName += "ActiveDirectory.1#DomainController1"
             $params.AttributeValue += $domainControllerServerAddress1
             $blankInput = $false
         }
 
-        if ($domainControllerServerAddress2) 
+        if ($domainControllerServerAddress2)
         {
             $params.AttributeName += "ActiveDirectory.1#DomainController2"
             $params.AttributeValue += $domainControllerServerAddress2
             $blankInput = $false
         }
 
-        if ($domainControllerServerAddress3) 
+        if ($domainControllerServerAddress3)
         {
             $params.AttributeName += "ActiveDirectory.1#DomainController3"
             $params.AttributeValue += $domainControllerServerAddress3
             $blankInput = $false
         }
 
-        if ($blankInput) 
+        if ($blankInput)
         {
             Throw "ERROR: No arguments passed."
         }
@@ -175,19 +175,19 @@ function Set-PECommonADSetting
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName), 'Set common AD setting'))
         {
             $responseData = Invoke-CimMethod -InputObject $instance -MethodName ApplyAttributes -CimSession $iDRACSession -Arguments $params #2>&1
-            if ($responseData.ReturnValue -eq 4096) 
+            if ($responseData.ReturnValue -eq 4096)
             {
-                if ($Passthru) 
+                if ($Passthru)
                 {
                     $responseData
-                } 
-                elseif ($Wait) 
+                }
+                elseif ($Wait)
                 {
                     Wait-PEConfigurationJob -iDRACSession $iDRACSession -JobID $responseData.Job.EndpointReference.InstanceID -Activity "Applying Configuration Changes to Comman AD Settings for $($iDRACsession.ComputerName)"
                     Write-Verbose "Changes to Common AD Settings applied successfully"
                 }
-            } 
-            else 
+            }
+            else
             {
                 Throw "Job Creation failed with error: $($responseData.Message)"
             }

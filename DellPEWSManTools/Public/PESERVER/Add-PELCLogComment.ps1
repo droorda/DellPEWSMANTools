@@ -30,11 +30,11 @@ function Add-PELCLogComment
     if ($LogSequenceNumber)
     {
         Write-Verbose -Message 'Adding a LC log comment ..'
-        $parameters.Add('LogSequenceNumber', $LogSequenceNumber)        
+        $parameters.Add('LogSequenceNumber', $LogSequenceNumber)
     }
     else
     {
-        Write-Verbose -Message 'Adding the comment as work notes ..'    
+        Write-Verbose -Message 'Adding the comment as work notes ..'
     }
 
     $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_LCService";Name="DCIM:LCService";}

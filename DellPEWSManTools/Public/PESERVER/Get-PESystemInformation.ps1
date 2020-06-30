@@ -24,6 +24,6 @@ function Get-PESystemInformation
 
         Write-Verbose "Getting System Information for $($iDRACSession.ComputerName) ..."
         Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_SystemView -Namespace "root/dcim"
-    
+
     }
 }

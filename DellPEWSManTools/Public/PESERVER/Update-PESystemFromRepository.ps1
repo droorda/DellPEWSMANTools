@@ -42,17 +42,17 @@ function Update-PESystemFromRepository
         [bool] $RebootNeeded = $False,
 
         [Parameter()]
-        [Switch] $ValidateOnly 
-    
+        [Switch] $ValidateOnly
+
     )
 
-    Process 
+    Process
     {
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName),'Update system from repository'))
         {
             $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_SoftwareInstallationService";Name="DCIM:SoftwareUpdate";}
             $instance = New-CimInstance -ClassName DCIM_SoftwareInstallationService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
-                
+
             $Parameters = @{
                 IPAddress = $IPAddress
                 ShareName = $ShareName

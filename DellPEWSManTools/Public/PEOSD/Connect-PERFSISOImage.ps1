@@ -17,7 +17,7 @@ function Connect-PERFSISOImage
         [Alias("s")]
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
-        
+
         [Parameter(Mandatory)]
         [ValidateScript({[System.Net.IPAddress]::TryParse($_,[ref]$null)})]
         [String] $IPAddress,
@@ -34,16 +34,16 @@ function Connect-PERFSISOImage
         [Parameter()]
         [ValidateSet("NFS","CIFS")]
         [String]$ShareType = "CIFS",
-        
+
         [Parameter()]
         [ValidateSet('MD5','SHA1')]
         [String] $HashType,
 
         [Parameter()]
         [String] $HashValue
-    )   
+    )
 
-    Begin 
+    Begin
     {
         $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_OSDeploymentService";Name="DCIM:OSDeploymentService";}
         $instance = New-CimInstance -ClassName DCIM_OSDeploymentService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties

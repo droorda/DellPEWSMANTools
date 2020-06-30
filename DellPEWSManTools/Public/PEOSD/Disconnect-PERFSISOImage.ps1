@@ -17,9 +17,9 @@ function Disconnect-PERFSISOImage
         [Alias("s")]
         [ValidateNotNullOrEmpty()]
         $iDRACSession
-    )   
+    )
 
-    Begin 
+    Begin
     {
         $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_OSDeploymentService";Name="DCIM:OSDeploymentService";}
         $instance = New-CimInstance -ClassName DCIM_OSDeploymentService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties

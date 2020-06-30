@@ -22,10 +22,10 @@ function Get-PENetworkDeviceStatistic
         [String] $FQDD
     )
 
-    Process 
+    Process
     {
         Write-Verbose "Getting Network device statistics for $($iDRACSession.ComputerName) ..."
-        
+
         if ($FQDD)
         {
             $filter = "FQDD='$FQDD'"
@@ -35,6 +35,6 @@ function Get-PENetworkDeviceStatistic
             $filter = $null
         }
         Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_NICStatistics -Namespace root\dcim -Filter $filter
-    
+
     }
 }

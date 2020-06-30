@@ -7,7 +7,7 @@ Copyright (c) 2017, Dell, Inc.
 
 This software is licensed to you under the GNU General Public License, version 2 (GPLv2). There is NO WARRANTY for this software, express or implied, including the implied warranties of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. You should have received a copy of GPLv2 along with this software; if not, see http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 #>
-Function Clear-PERAIDConfiguration 
+Function Clear-PERAIDConfiguration
 {
     [CmdletBinding(
         SupportsShouldProcess=$true,
@@ -23,9 +23,9 @@ Function Clear-PERAIDConfiguration
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
+                   ValueFromPipelineByPropertyName=$true,
                    ValueFromRemainingArguments=$false,
                    ParameterSetName='General')]
         [Parameter(ParameterSetName='Passthru')]
@@ -60,57 +60,57 @@ Function Clear-PERAIDConfiguration
         [Switch] $Passthru
     )
 
-    Begin 
+    Begin
     {
         $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_RAIDService";Name="DCIM:RAIDService";}
-        $instance = New-CimInstance -ClassName DCIM_RAIDService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties        
-        if ($Force) 
+        $instance = New-CimInstance -ClassName DCIM_RAIDService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
+        if ($Force)
         {
             $ConfirmPreference = 'None'
         }
     }
 
-    Process 
+    Process
     {
-        if ($PSCmdlet.ShouldProcess($InstanceID, 'Clear Configuration')) 
+        if ($PSCmdlet.ShouldProcess($InstanceID, 'Clear Configuration'))
         {
             $output = Invoke-CimMethod -InputObject $instance -MethodName ResetConfig -CimSession $idracsession -Arguments @{'Target'=$InstanceID}
-            if ($output.ReturnValue -eq 0) 
+            if ($output.ReturnValue -eq 0)
             {
                 if ($Output.RebootRequired -eq 'Yes') {
                     $RebootRequired = $true
-                    if ($RebootType -eq 'None') 
+                    if ($RebootType -eq 'None')
                     {
                         Write-Warning 'A job will be scheduled but a reboot is required to complete the task. However, reboot type has been set to None. Manually power Cycle the target system to complete this job.'
-                    } 
-                    else 
+                    }
+                    else
                     {
                         Write-Warning "A job will be scheduled and a system reboot ($RebootType) will be initiated to complete the task"
                     }
                 }
-                else 
+                else
                 {
                     $RebootRequired = $false
-                    if ($RebootType -ne 'None') 
+                    if ($RebootType -ne 'None')
                     {
                         Write-Warning "System reboot is not required to complete the task. However, Reboot type is set to $RebootType. A reboot will be initiated to complete the task"
                     }
                 }
-            
-                if ($PSCmdlet.ParameterSetName -eq 'Passthru') 
+
+                if ($PSCmdlet.ParameterSetName -eq 'Passthru')
                 {
                     New-PETargetedConfigurationJob -iDRACSession $idracsession -InstanceID $InstanceID -StartTime $StartTime -UntilTime $UntilTime -RebootType $RebootType -RebootRequired $RebootRequired -Passthru
-                } 
-                elseif ($PSCmdlet.ParameterSetName -eq 'Wait') 
+                }
+                elseif ($PSCmdlet.ParameterSetName -eq 'Wait')
                 {
                     New-PETargetedConfigurationJob -iDRACSession $idracsession -InstanceID $InstanceID -StartTime $StartTime -UntilTime $UntilTime -RebootType $RebootType -RebootRequired $RebootRequired -Wait
-                } 
-                else 
+                }
+                else
                 {
                     New-PETargetedConfigurationJob -iDRACSession $idracsession -InstanceID $InstanceID -StartTime $StartTime -UntilTime $UntilTime -RebootType $RebootType -RebootRequired $RebootRequired
                 }
             }
-            else 
+            else
             {
                 $output
             }

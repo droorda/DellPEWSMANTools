@@ -7,7 +7,7 @@ Copyright (c) 2017, Dell, Inc.
 
 This software is licensed to you under the GNU General Public License, version 2 (GPLv2). There is NO WARRANTY for this software, express or implied, including the implied warranties of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. You should have received a copy of GPLv2 along with this software; if not, see http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 #>
-function Export-PETechSupportReport 
+function Export-PETechSupportReport
 {
     [CmdletBinding(DefaultParameterSetName='General')]
     Param
@@ -74,23 +74,23 @@ function Export-PETechSupportReport
         [Switch]$Wait
     )
 
-    Begin 
+    Begin
     {
         $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_LCService";Name="DCIM:LCService";}
         $instance = New-CimInstance -ClassName DCIM_LCService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
 
-        if ($DataSelector -notcontains 'HWDATA') 
+        if ($DataSelector -notcontains 'HWDATA')
         {
             $DataSelector += 'HWDATA'
         }
 
         $DataSelectorArray = foreach ($selector in $DataSelector) { [TechSupportSelector]$selector -as [int] }
-        
-        if ($ShareObject) 
+
+        if ($ShareObject)
         {
             $Parameters = $ShareObject.Clone()
-        } 
-        else 
+        }
+        else
         {
             $Parameters = @{
                 IPAddress = $IPAddress
@@ -98,11 +98,11 @@ function Export-PETechSupportReport
                 ShareType = ([ShareType]$ShareType -as [int])
             }
 
-            if ($Credential) 
+            if ($Credential)
             {
                 $Parameters.Add('Username',$Credential.GetNetworkCredential().UserName)
                 $Parameters.Add('Password',$Credential.GetNetworkCredential().Password)
-                if ($Credential.GetNetworkCredential().Domain) 
+                if ($Credential.GetNetworkCredential().Domain)
                 {
                     $Parameters.Add('Workgroup',$Credential.GetNetworkCredential().Domain)
                 }
@@ -112,25 +112,25 @@ function Export-PETechSupportReport
         $Parameters.Add('DataSelectorArrayIn', $DataSelectorArray)
     }
 
-    Process 
+    Process
     {
- 
+
         $job = Invoke-CimMethod -InputObject $instance -MethodName ExportTechSupportReport -CimSession $iDRACSession -Arguments $Parameters
 
-        if ($job.ReturnValue -eq 4096) 
+        if ($job.ReturnValue -eq 4096)
         {
-            if ($Passthru) 
+            if ($Passthru)
             {
                 $job
-            } 
-            elseif ($Wait) 
+            }
+            elseif ($Wait)
             {
                 if ($job.ReturnValue -eq 4096) {
                     Wait-PEConfigurationJob -iDRACSession $iDRACSession -JobID $job.Job.EndpointReference.InstanceID -Activity "Importing System Configuration for $($iDRACSession.ComputerName)"
                 }
             }
-        } 
-        else 
+        }
+        else
         {
             Throw "Job creation failed with an error: $($Job.Message)"
         }

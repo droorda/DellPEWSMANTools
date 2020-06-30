@@ -18,7 +18,7 @@ function Set-PEPowerState
     (
         [Parameter(Mandatory,
                    ParameterSetName='General')]
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ParameterSetName='Passthru')]
         [Alias("s")]
         [ValidateNotNullOrEmpty()]
@@ -32,31 +32,31 @@ function Set-PEPowerState
         [Parameter(ParameterSetName='General')]
         [Parameter(ParameterSetName='Passthru')]
         [switch]$Force,
-        
+
         [Parameter(ParameterSetName='Passthru')]
         [switch]$Passthru
     )
 
-    Begin 
+    Begin
     {
         $properties=@{CreationClassName="DCIM_ComputerSystem";Name="srv:system";}
         $instance = New-CimInstance -ClassName DCIM_ComputerSystem -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
-        if ($Force) 
+        if ($Force)
         {
             $ConfirmPreference = 'None'
         }
     }
 
-    Process 
+    Process
     {
         if ($pscmdlet.ShouldProcess($iDRACSession.ComputerName, $State))
         {
             $job = Invoke-CimMethod -InputObject $instance -MethodName RequestStateChange -CimSession $iDRACSession -Arguments @{'RequestedState'= [PowerState]$State -as [int]}
-            if ($PSCmdlet.ParameterSetName -eq 'Passthru') 
+            if ($PSCmdlet.ParameterSetName -eq 'Passthru')
             {
                 $job
             }
         }
-        
+
     }
 }

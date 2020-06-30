@@ -35,7 +35,7 @@ function Set-PEAutobackupSchedule
                    Position=0,
                    ParameterSetName='SharePassThru')]
         [ValidateNotNullOrEmpty()]
-        [Alias("s")] 
+        [Alias("s")]
         $iDRACSession,
 
         [Parameter(Mandatory,ParameterSetName='Share')]
@@ -167,11 +167,11 @@ function Set-PEAutobackupSchedule
     Begin
     {
         $Parameters=@{}
-        if ($ShareObject) 
+        if ($ShareObject)
         {
             $Parameters = $ShareObject.Clone()
-        } 
-        else 
+        }
+        else
         {
             $Parameters = @{
                 IPAddress = $IPAddress
@@ -179,11 +179,11 @@ function Set-PEAutobackupSchedule
                 ShareType = ([ShareType]$ShareType -as [int])
             }
 
-            if ($Credential) 
+            if ($Credential)
             {
                 $Parameters.Add('Username',$Credential.GetNetworkCredential().UserName)
                 $Parameters.Add('Password',$Credential.GetNetworkCredential().Password)
-                if ($Credential.GetNetworkCredential().Domain) 
+                if ($Credential.GetNetworkCredential().Domain)
                 {
                     $Parameters.Add('Domain',$Credential.GetNetworkCredential().Domain)
                 }
@@ -200,12 +200,12 @@ function Set-PEAutobackupSchedule
         $Parameters.Add('DayOfMonth', $DayOfMonth)
         $Parameters.Add('WeekOfMonth', $WeekOfMonth)
         $Parameters.Add('DayOfWeek', $DayOfWeek)
-        if ($Repeat) 
+        if ($Repeat)
         {
             $Parameters.Add('Repeat', $Repeat)
         }
 
-        if ($MaxNumberOfBackupArchives) 
+        if ($MaxNumberOfBackupArchives)
         {
             $Parameters.Add('MaxNumberOfBackupArchives', $MaxNumberOfBackupArchives)
         }
@@ -230,18 +230,18 @@ function Set-PEAutobackupSchedule
             $argMap = @{ScheduledStartTime="TIME_NOW"}
             $responseData = Invoke-CimMethod -InputObject $instance -MethodName CreateConfigJob -CimSession $iDRACSession -Arguments $argMap
 
-            if ($responseData.ReturnValue -eq 4096) 
+            if ($responseData.ReturnValue -eq 4096)
             {
-                if ($Passthru) 
+                if ($Passthru)
                 {
                     $responseData
-                } 
-                elseif ($Wait) 
+                }
+                elseif ($Wait)
                 {
                     Wait-PEConfigurationJob -iDRACSession $iDRACSession -JobID $responseData.Job.EndpointReference.InstanceID -Activity "Configuration Job for $($iDRACSession.ComputerName)"
                     Write-Verbose "Configuration Job on $($iDRACSession.ComputerName) was successful"
                 }
-            } else 
+            } else
             {
                 Throw "Configuration Job Creation failed with error: $($responseData.Message)"
             }
@@ -251,23 +251,23 @@ function Set-PEAutobackupSchedule
 
             $responseData = Invoke-CimMethod -InputObject $instance -MethodName SetBackupSchedule -CimSession $iDRACSession -Arguments $Parameters #2>&1
 
-            if ($responseData.ReturnValue -eq 4096) 
+            if ($responseData.ReturnValue -eq 4096)
             {
-                if ($Passthru) 
+                if ($Passthru)
                 {
                     $responseData
-                } 
-                elseif ($Wait) 
+                }
+                elseif ($Wait)
                 {
                     Wait-PEConfigurationJob -iDRACSession $iDRACSession -JobID $responseData.Job.EndpointReference.InstanceID -Activity "Automatic Backup Schedule for $($iDRACSession.ComputerName)"
                     Write-Verbose "Automatic Backup Schedule on $($iDRACSession.ComputerName) was successful"
                 }
-            } 
-            else 
+            }
+            else
             {
                 Throw "Automatic Backup Schedule failed with error: $($responseData.Message)"
             }
         }
-        
+
     }
 }

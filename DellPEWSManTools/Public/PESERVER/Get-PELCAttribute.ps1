@@ -23,8 +23,8 @@ function Get-PELCAttribute
 
         [Parameter(Mandatory=$true,ParameterSetName='Named')]
         [String] $AttributeName
-    ) 
-       
+    )
+
     Begin
     {
         # Commenting this out, not being used

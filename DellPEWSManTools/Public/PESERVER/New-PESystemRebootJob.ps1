@@ -20,16 +20,16 @@ function New-PESystemRebootJob
         [Parameter(Mandatory)]
         [ValidateSet(1,2,3)]
         [String] $RebootJobType
-    
+
     )
 
-    Process 
+    Process
     {
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName),'create new system reboot job'))
         {
             $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_SoftwareInstallationService";Name="DCIM:SoftwareUpdate";}
             $instance = New-CimInstance -ClassName DCIM_SoftwareInstallationService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
-                
+
             $Parameters = @{
                 RebootJobType = $RebootJobType
             }

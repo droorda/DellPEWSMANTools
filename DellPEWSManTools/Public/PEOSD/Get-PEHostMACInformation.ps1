@@ -14,10 +14,10 @@ function Get-PEHostMACInformation
         [Parameter(Mandatory)]
         [Alias("s")]
         [ValidateNotNullOrEmpty()]
-        $iDRACSession    
-    )   
+        $iDRACSession
+    )
 
-    Begin 
+    Begin
     {
         $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_OSDeploymentService";Name="DCIM:OSDeploymentService";}
         $instance = New-CimInstance -ClassName DCIM_OSDeploymentService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
@@ -26,13 +26,13 @@ function Get-PEHostMACInformation
     Process
     {
         $result = Invoke-CimMethod -InputObject $instance -MethodName GetHostMACInfo -CimSession $iDRACSession
-        if ($result.ReturnValue -ne 0) 
+        if ($result.ReturnValue -ne 0)
         {
             Write-Error $result.Message
-        } 
-        else 
+        }
+        else
         {
             $result
-        }        
+        }
     }
 }

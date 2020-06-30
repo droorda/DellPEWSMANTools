@@ -18,8 +18,8 @@ function Get-PELCState
         [Alias("s")]
         [ValidateNotNullOrEmpty()]
         $iDRACSession
-    ) 
-       
+    )
+
     Begin
     {
 

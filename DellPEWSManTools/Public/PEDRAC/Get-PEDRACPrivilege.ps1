@@ -7,7 +7,7 @@ Copyright (c) 2017, Dell, Inc.
 
 This software is licensed to you under the GNU General Public License, version 2 (GPLv2). There is NO WARRANTY for this software, express or implied, including the implied warranties of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. You should have received a copy of GPLv2 along with this software; if not, see http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 #>
-Function Get-PEDRACPrivilege 
+Function Get-PEDRACPrivilege
 {
     [CmdletBinding()]
     [OutputType([int])]
@@ -35,22 +35,22 @@ Function Get-PEDRACPrivilege
         [Int]$PrivilegeValue
     )
 
-    Process 
+    Process
     {
-        if ($PSCmdlet.ParameterSetName -eq 'EncodeSpecial') 
+        if ($PSCmdlet.ParameterSetName -eq 'EncodeSpecial')
         {
             [iDRAC.Privileges]$SpecialPrivilege -as [int]
-        } 
-        elseif ($PSCmdlet.ParameterSetName -eq 'EncodeGroup') 
+        }
+        elseif ($PSCmdlet.ParameterSetName -eq 'EncodeGroup')
         {
             $result = 0
-            foreach ($privilege in $GroupedPrivilege) 
+            foreach ($privilege in $GroupedPrivilege)
             {
                 $result = $result -bor [iDRAC.Privileges]$privilege
             }
             $result
-        } 
-        else 
+        }
+        else
         {
             [iDRAC.Privileges]$PrivilegeValue
         }

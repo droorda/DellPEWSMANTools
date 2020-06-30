@@ -29,7 +29,7 @@ function Update-PEOSAppHealthData
         [Parameter(ParameterSetName='Wait')]
         [ValidateSet('AgentLiteOSPlugin','Manual')]
         [String]$UpdateType = 'AgentLiteOSPlugin',
-        
+
         [Parameter()]
         [Parameter(Mandatory,ParameterSetName='Wait')]
         [switch]$Wait,
@@ -53,18 +53,18 @@ function Update-PEOSAppHealthData
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName),'Update OS App health data'))
         {
             $job = Invoke-CimMethod -InputObject $instance -MethodName UpdateOSAppHealthData -CimSession $iDRACSession -Arguments $Parameters
-            if ($job.ReturnValue -eq 4096) 
+            if ($job.ReturnValue -eq 4096)
             {
-                if ($Passthru) 
+                if ($Passthru)
                 {
                     $job
-                } 
-                elseif ($Wait) 
+                }
+                elseif ($Wait)
                 {
                     Wait-PEConfigurationJob -JobID $job.Job.EndpointReference.InstanceID -iDRACSession $iDRACSession -Activity 'Updating OS APP Health Data'
                 }
-            } 
-            else 
+            }
+            else
             {
                 Throw "Job creation failed with an error: $($job.Message)"
             }

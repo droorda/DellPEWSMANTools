@@ -17,7 +17,7 @@ Function Get-PEStorageController
         $iDRACSession
     )
 
-    Process 
+    Process
     {
         Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_ControllerView -Namespace 'root/dcim'
     }

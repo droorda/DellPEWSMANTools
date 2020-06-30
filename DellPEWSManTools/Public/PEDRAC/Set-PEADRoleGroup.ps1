@@ -9,7 +9,7 @@ This software is licensed to you under the GNU General Public License, version 2
 #>
 function Set-PEADRoleGroup
 {
-    [CmdletBinding(DefaultParameterSetName='General',  
+    [CmdletBinding(DefaultParameterSetName='General',
                   PositionalBinding=$false,
                   SupportsShouldProcess=$true,
                   ConfirmImpact='low')]
@@ -27,7 +27,7 @@ function Set-PEADRoleGroup
                    Position=0,
                    ParameterSetName='Passthru')]
         [ValidateNotNullOrEmpty()]
-        [Alias("s")] 
+        [Alias("s")]
         $iDRACSession,
 
         # Role Group Number
@@ -78,7 +78,7 @@ function Set-PEADRoleGroup
     Begin
     {
         $properties=@{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_iDRACCardService";Name="DCIM:iDRACCardService";}
-        $instance = New-CimInstance -ClassName DCIM_iDRACCardService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties 
+        $instance = New-CimInstance -ClassName DCIM_iDRACCardService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
 
         $params=@{Target="iDRAC.Embedded.1"}
 
@@ -89,33 +89,33 @@ function Set-PEADRoleGroup
 
         $blankInput = $true
 
-        if ($groupName) 
+        if ($groupName)
         {
             $params.AttributeName += $group + "Name"
             $params.AttributeValue += $groupName
             $blankInput = $false
         }
 
-        if ($domainName) 
+        if ($domainName)
         {
             $params.AttributeName += $group + "Domain"
             $params.AttributeValue += $domainName
             $blankInput = $false
         }
 
-        if ($privilege) 
+        if ($privilege)
         {
             $params.AttributeName += $group + "Privilege"
             $params.AttributeValue += $privilege
             $blankInput = $false
         }
 
-        if ($blankInput) 
+        if ($blankInput)
         {
             Throw "ERROR: No arguments passed."
         }
     }
-    Process 
+    Process
     {
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName),'Set AD Role group'))
         {
@@ -123,17 +123,17 @@ function Set-PEADRoleGroup
 
             if ($responseData.ReturnValue -eq 4096)
                 {
-                if ($Passthru) 
+                if ($Passthru)
                 {
                     $responseData
-                } 
-                elseif ($Wait) 
+                }
+                elseif ($Wait)
                 {
                     Wait-PEConfigurationJob -iDRACSession $iDRACSession -JobID $responseData.Job.EndpointReference.InstanceID -Activity "Applying Configuration Changes to AD RoleGroup for $($iDRACsession.ComputerName)"
                     Write-Verbose "AD Role Group Settings Successfully Applied"
                 }
-            } 
-            else 
+            }
+            else
             {
                 Throw "Job Creation failed with error: $($responseData.Message)"
             }

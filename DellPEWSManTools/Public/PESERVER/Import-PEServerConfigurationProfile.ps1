@@ -7,7 +7,7 @@ Copyright (c) 2017, Dell, Inc.
 
 This software is licensed to you under the GNU General Public License, version 2 (GPLv2). There is NO WARRANTY for this software, express or implied, including the implied warranties of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. You should have received a copy of GPLv2 along with this software; if not, see http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 #>
-function Import-PEServerConfigurationProfile 
+function Import-PEServerConfigurationProfile
 {
     [CmdletBinding(DefaultParameterSetName='General')]
     Param
@@ -107,17 +107,17 @@ function Import-PEServerConfigurationProfile
         [Switch]$Preview
     )
 
-    Begin 
+    Begin
     {
         $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_LCService";Name="DCIM:LCService";}
         $instance = New-CimInstance -ClassName DCIM_LCService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
-        
-        if ($ShareObject) 
+
+        if ($ShareObject)
         {
             $Parameters = $ShareObject.Clone()
             $Parameters.Add('FileName', $FileName)
-        } 
-        else 
+        }
+        else
         {
             $Parameters = @{
                 IPAddress = $IPAddress
@@ -126,7 +126,7 @@ function Import-PEServerConfigurationProfile
                 FileName = $FileName
             }
 
-            if ($Credential) 
+            if ($Credential)
             {
                 $Parameters.Add('Username',$Credential.GetNetworkCredential().UserName)
                 $Parameters.Add('Password',$Credential.GetNetworkCredential().Password)
@@ -137,12 +137,12 @@ function Import-PEServerConfigurationProfile
             }
         }
 
-        if ($Target) 
+        if ($Target)
         {
             $Parameters.Add('Target', $Target)
         }
 
-        if (-not $Preview) 
+        if (-not $Preview)
         {
             $Parameters.Add('ShutdownType',[ShutdownType]$ShutdownType -as [int])
             $Parameters.Add('EndHostPowerState',[EndHostPowerState]$EndHostPowerState -as [int])
@@ -150,30 +150,30 @@ function Import-PEServerConfigurationProfile
 
     }
 
-    Process 
+    Process
     {
 
-        if ($Preview) 
+        if ($Preview)
         {
             $job = Invoke-CimMethod -InputObject $instance -MethodName ImportSystemConfigurationPreview -CimSession $iDRACSession -Arguments $Parameters
-        } 
-        else 
+        }
+        else
         {
             $job = Invoke-CimMethod -InputObject $instance -MethodName ImportSystemConfiguration -CimSession $iDRACSession -Arguments $Parameters
         }
 
-        if ($job.ReturnValue -eq 4096) 
+        if ($job.ReturnValue -eq 4096)
         {
-            if ($Passthru) 
+            if ($Passthru)
             {
                 $job
-            } 
-            elseif ($Wait) 
+            }
+            elseif ($Wait)
             {
                 Wait-PEConfigurationJob -iDRACSession $iDRACSession -JobID $job.Job.EndpointReference.InstanceID -Activity "Importing System Configuration for $($iDRACSession.ComputerName)"
             }
-        } 
-        else 
+        }
+        else
         {
             Throw "Job Creation failed with error: $($Job.Message)"
         }

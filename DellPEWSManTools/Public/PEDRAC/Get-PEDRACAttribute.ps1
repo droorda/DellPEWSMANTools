@@ -27,8 +27,8 @@ function Get-PEDRACAttribute
         [String] $AttributeName,
 
         [String] $GroupDisplayName
-    ) 
-       
+    )
+
     Begin
     {
         #$CimOptions = New-CimSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck -Encoding Utf8 -UseSsl
@@ -92,7 +92,7 @@ function Get-PEDRACAttribute
 #                    } else {
 #                        try {
 #                            write-warning "Failing to Slow Get-PEDRACAttribute Method"
-#                            $temp = Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_iDRACCardAttribute -Namespace root\dcim -ErrorAction Stop 
+#                            $temp = Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_iDRACCardAttribute -Namespace root\dcim -ErrorAction Stop
 #                            if ($GroupID             ){ $temp = $temp | Where {$_.GroupID              -eq $GroupID             } }
 #                            if ($AttributeDisplayName){ $temp = $temp | Where {$_.AttributeDisplayName -eq $AttributeDisplayName} }
 #                            if ($AttributeName       ){ $temp = $temp | Where {$_.AttributeName        -eq $AttributeName       } }

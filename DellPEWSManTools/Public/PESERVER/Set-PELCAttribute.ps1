@@ -25,8 +25,8 @@ function Set-PELCAttribute
 
         # Pending or Current value to be set
         [Parameter()]
-        [String[]] $AttributeValue        
-    ) 
+        [String[]] $AttributeValue
+    )
 
     Begin
     {
@@ -40,7 +40,7 @@ function Set-PELCAttribute
         {
             #Check if the attribute is settable.
             $attribute = Get-PELCAttribute -iDRACSession $iDRACSession -AttributeName $AttributeName #-Verbose
-            
+
             if ($attribute)
             {
                 if ($attribute.IsReadOnly -eq 'false')

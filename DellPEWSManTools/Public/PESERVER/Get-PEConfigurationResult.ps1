@@ -15,12 +15,12 @@ Function Get-PEConfigurationResult
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
-    
+
         [Parameter(Mandatory)]
         $JobID
     )
 
-    Begin 
+    Begin
     {
         $properties=@{InstanceID="DCIM:LifeCycleLog";}
         $instance = New-CimInstance -ClassName DCIM_LCRecordLog -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
@@ -30,16 +30,16 @@ Function Get-PEConfigurationResult
         }
     }
 
-    Process 
+    Process
     {
         $Result = Invoke-CimMethod -InputObject $instance -MethodName GetConfigResults -CimSession $iDRACSession -Arguments $Parameters
-        if ($Result.ReturnValue -eq 0) 
+        if ($Result.ReturnValue -eq 0)
         {
             $Xml = $Result.COnfigResults
             $XmlDoc = New-Object System.Xml.XmlDocument
             $ConfigResults = $XmlDoc.CreateElement('Configuration')
             $ConfigResults.InnerXml = $Xml
-            Foreach ($ConfigResult in $ConfigResults.ConfigResults) 
+            Foreach ($ConfigResult in $ConfigResults.ConfigResults)
             {
                 $ResultHash = [Ordered]@{
                     JobName = $ConfigResult.JobName
@@ -48,7 +48,7 @@ Function Get-PEConfigurationResult
                     FQDD = $ConfigResult.FQDD
                 }
                 $OperationArray = @()
-                Foreach ($Operation in $ConfigResult.Operation) 
+                Foreach ($Operation in $ConfigResult.Operation)
                 {
                     $OperationHash = [Ordered]@{
                         Name = $Operation.Name -join ' - '
@@ -59,16 +59,16 @@ Function Get-PEConfigurationResult
                         Status = $Operation.Status
                         ErrorCode = $Operation.ErrorCode
                     }
-                    $OperationArray += $OperationHash      
+                    $OperationArray += $OperationHash
                 }
                 $ResultHash.Add('Operation',$OperationArray)
                 New-Object -TypeName PSObject -Property $ResultHash
             }
-        } 
-        else 
+        }
+        else
         {
             Write-Error $Result.Message
         }
-        
+
     }
 }

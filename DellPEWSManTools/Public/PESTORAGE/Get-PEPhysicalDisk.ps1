@@ -33,12 +33,12 @@ Function Get-PEPhysicalDisk
         }
         elseif ($MediaType)
         {
-            $mediaInt = [int]([Disk.MediaType]$MediaType)          
+            $mediaInt = [int]([Disk.MediaType]$MediaType)
             $filter = "MediaType=$mediaInt"
         }
         elseif ($BusProtocol)
         {
-            $busProtocolInt = [int]([Disk.BusProtocol]$BusProtocol)            
+            $busProtocolInt = [int]([Disk.BusProtocol]$BusProtocol)
             $filter = "BusProtocol=$BusProtocolInt"
         }
         else

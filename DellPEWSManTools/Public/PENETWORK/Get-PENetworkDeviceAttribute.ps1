@@ -15,7 +15,7 @@ function Get-PENetworkDeviceAttribute
     (
         [Parameter(Mandatory)]
         [Alias("s")]
-        [ValidateNotNullOrEmpty()]  
+        [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
         [Parameter()]
@@ -28,10 +28,10 @@ function Get-PENetworkDeviceAttribute
         [String] $AttributeDisplayName
     )
 
-    Process 
+    Process
     {
             Write-Verbose "Getting Network device attributes for $($iDRACSession.ComputerName) ..."
-            
+
             if ($FQDD)
             {
                 if ($AttributeDisplayName -and $GroupDisplayName)

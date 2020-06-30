@@ -18,7 +18,7 @@ function Get-PEBootOrder
         [ValidateNotNullOrEmpty()]
         $iDRACSession
     )
-    
+
     Process
     {
         Write-Verbose -Message "Getting boot order for $($iDRACSession.ComputerName) ..."

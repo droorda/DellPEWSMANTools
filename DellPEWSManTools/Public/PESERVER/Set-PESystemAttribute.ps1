@@ -26,8 +26,8 @@ function Set-PESystemAttribute {
 
         # Pending or Current value to be set
         [Parameter(Mandatory)]
-        [String[]] $AttributeValue        
-    ) 
+        [String[]] $AttributeValue
+    )
 
     Begin {
         $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="srv:system";CreationClassName="DCIM_SystemManagementService";Name="DCIM:SystemManagementService";}
@@ -37,7 +37,7 @@ function Set-PESystemAttribute {
     Process {
         #Check if the attribute is settable.
         $attribute = Get-PESystemAttribute -iDRACSession $iDRACSession -GroupID $GroupID -AttributeName $AttributeName #-Verbose
-            
+
         if ($attribute) {
             if ($attribute.IsReadOnly -ne 'false') {
                 Write-Error -Message "${AttributeName} is readonly and cannot be configured."
@@ -49,7 +49,7 @@ function Set-PESystemAttribute {
         }
 
         #Check if the AttributeValue falls in the same set as the PossibleValues by calling the helper function
-                
+
         if ($attribute.PossibleValues){
             if ( -not (TestPossibleValuesContainAttributeValues -PossibleValues $attribute.PossibleValues -AttributeValues $AttributeValue)) {
                 Write-Error -Message "Attribute value `"${AttributeValue}`" is not valid for attribute ${AttributeName}."

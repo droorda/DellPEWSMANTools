@@ -22,9 +22,9 @@ Function New-PESystemConfigurationJob
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
+                   ValueFromPipelineByPropertyName=$true,
                    ValueFromRemainingArguments=$false,
                    ParameterSetName='General')]
         [Parameter(ParameterSetName='Passthru')]
@@ -59,7 +59,7 @@ Function New-PESystemConfigurationJob
         [Switch] $Passthru
     )
 
-    Begin 
+    Begin
     {
         $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="srv:system";CreationClassName="DCIM_SystemManagementService";Name="DCIM:SystemManagementService";}
         $instance = New-CimInstance -ClassName DCIM_SystemManagementService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
@@ -68,36 +68,36 @@ Function New-PESystemConfigurationJob
             ScheduledStartTime = $StartTime
         }
 
-        if (-not ($RebootType -eq 'None')) 
+        if (-not ($RebootType -eq 'None'))
         {
             $Parameters.Add('RebootJobType',([ConfigJobRebootType]$RebootType -as [int]))
         }
 
-        if ($UntilTime) 
+        if ($UntilTime)
         {
             $Parameters.Add('UntilTime',$UntilTime)
         }
         $Parameters
     }
 
-    Process 
+    Process
     {
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName),'create targeted configuration job'))
         {
             $Job = Invoke-CimMethod -InputObject $instance -MethodName CreateTargetedConfigJob -CimSession $idracsession -Arguments $Parameters
-            if ($Job.ReturnValue -eq 4096) 
+            if ($Job.ReturnValue -eq 4096)
             {
-                if ($PSCmdlet.ParameterSetName -eq 'Passthru') 
+                if ($PSCmdlet.ParameterSetName -eq 'Passthru')
                 {
                     $Job
-                } 
-                elseif ($PSCmdlet.ParameterSetName -eq 'Wait') 
+                }
+                elseif ($PSCmdlet.ParameterSetName -eq 'Wait')
                 {
                     Write-Verbose 'Starting configuration job ...'
-                    Wait-PEConfigurationJob -JobID $Job.Job.EndpointReference.InstanceID -Activity 'Performing BIOS Configuration ..'                
+                    Wait-PEConfigurationJob -JobID $Job.Job.EndpointReference.InstanceID -Activity 'Performing BIOS Configuration ..'
                 }
-            } 
-            else 
+            }
+            else
             {
                 Write-Error $Job.Message
             }

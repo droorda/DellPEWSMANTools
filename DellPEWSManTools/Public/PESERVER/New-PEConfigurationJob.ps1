@@ -22,9 +22,9 @@ Function New-PEConfigurationJob
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
+                   ValueFromPipelineByPropertyName=$true,
                    ValueFromRemainingArguments=$false,
                    ParameterSetName='General')]
         [Parameter(ParameterSetName='Passthru')]
@@ -33,14 +33,14 @@ Function New-PEConfigurationJob
         #EG: DCIM_BIOSService
         ,
 
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
+                   ValueFromPipelineByPropertyName=$true,
                    ValueFromRemainingArguments=$false,
                    ParameterSetName='General')]
         [Parameter(ParameterSetName='Passthru')]
         [Parameter(ParameterSetName='Wait')]
-        $InstanceID 
+        $InstanceID
         #EG: System.Embedded.1
         ,
 
@@ -74,38 +74,38 @@ Function New-PEConfigurationJob
         [Switch] $Passthru
     )
 
-    Begin 
+    Begin
     {
         write-Verbose "New-PEConfigurationJob -iDRACSession $iDRACSession -CimClass $CimClass -InstanceID $InstanceID"
         $properties=@{}
-        (Get-CimInstance -CimSession $iDRACSession -ClassName $CimClass -Namespace $Namespace).PSObject.Properties | 
-                where {@('SystemCreationClassName','SystemName','CreationClassName','Name') -contains $_.name} | 
+        (Get-CimInstance -CimSession $iDRACSession -ClassName $CimClass -Namespace $Namespace).PSObject.Properties |
+                where {@('SystemCreationClassName','SystemName','CreationClassName','Name') -contains $_.name} |
                 foreach {
                     Write-Verbose "CIM Property `"$($_.name)`" = $($_.value)"
                     $properties[$_.name] = $_.value
                 }
         $instance = New-CimInstance -ClassName $CimClass -Namespace $Namespace -ClientOnly -Key @($properties.keys) -Property $properties
-        
+
         $Parameters = @{
             Target = $InstanceID
             ScheduledStartTime = $StartTime
         }
 
-        if (-not ($RebootType -eq 'None')) 
+        if (-not ($RebootType -eq 'None'))
         {
             $Parameters.Add('RebootJobType',([ConfigJobRebootType]$RebootType -as [int]))
         }
 
-        if ($UntilTime) 
+        if ($UntilTime)
         {
             $Parameters.Add('UntilTime',$UntilTime)
         }
-        
+
         Write-Verbose "Parameters:"
         Write-Verbose ($Parameters | Out-String)
     }
 
-    Process 
+    Process
     {
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName),'create targeted configuration job'))
         {
@@ -114,19 +114,19 @@ Function New-PEConfigurationJob
             } else {
                 $Job = Invoke-CimMethod -InputObject $instance -MethodName CreateConfigJob -CimSession $idracsession #-Arguments $Parameters
             }
-            if ($Job.ReturnValue -eq 4096) 
+            if ($Job.ReturnValue -eq 4096)
             {
-                if ($PSCmdlet.ParameterSetName -eq 'Passthru') 
+                if ($PSCmdlet.ParameterSetName -eq 'Passthru')
                 {
                     $Job
-                } 
-                elseif ($PSCmdlet.ParameterSetName -eq 'Wait') 
+                }
+                elseif ($PSCmdlet.ParameterSetName -eq 'Wait')
                 {
                     Write-Verbose 'Starting configuration job ...'
-                    Wait-PEConfigurationJob -JobID $Job.Job.EndpointReference.InstanceID -Activity 'Performing BIOS Configuration ..'                
+                    Wait-PEConfigurationJob -JobID $Job.Job.EndpointReference.InstanceID -Activity 'Performing BIOS Configuration ..'
                 }
-            } 
-            else 
+            }
+            else
             {
                 Write-Error $Job.Message
             }

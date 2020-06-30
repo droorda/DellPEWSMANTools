@@ -25,11 +25,11 @@ Function Get-PEDriverPackInformation {
 
     Process {
         $result = Invoke-CimMethod -InputObject $instance -MethodName GetDriverPackInfo -CimSession $iDRACSession
-        if ($result.ReturnValue -ne 0) 
+        if ($result.ReturnValue -ne 0)
         {
             Write-Error $result.Message
-        } 
-        else 
+        }
+        else
         {
             $result
         }

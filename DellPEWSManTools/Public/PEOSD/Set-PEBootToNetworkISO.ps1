@@ -17,7 +17,7 @@ function Set-PEBootToNetworkISO
         [Alias("s")]
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
-        
+
         [Parameter(Mandatory)]
         [ValidateScript({[System.Net.IPAddress]::TryParse($_,[ref]$null)})]
         [String]
@@ -39,14 +39,14 @@ function Set-PEBootToNetworkISO
         [ValidateSet("NFS","CIFS")]
         [String]
         $ShareType = "CIFS",
-        
+
         [Parameter()]
         [ValidateSet(0,1,2)]
         [Int]
         $ResetType = 1
-    )   
+    )
 
-    Begin 
+    Begin
     {
         $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_OSDeploymentService";Name="DCIM:OSDeploymentService";}
         $instance = New-CimInstance -ClassName DCIM_OSDeploymentService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
@@ -63,7 +63,7 @@ function Set-PEBootToNetworkISO
             Password = $Credential.GetNetworkCredential().Password
             ResetType = $ResetType
         }
-                
+
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName),'Set Boot to network ISO'))
         {
             $result = Invoke-CimMethod -InputObject $instance -MethodName ConfigurableBootToNetworkISO -CimSession $iDRACSession -Arguments $params

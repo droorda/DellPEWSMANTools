@@ -7,7 +7,7 @@ Copyright (c) 2017, Dell, Inc.
 
 This software is licensed to you under the GNU General Public License, version 2 (GPLv2). There is NO WARRANTY for this software, express or implied, including the implied warranties of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. You should have received a copy of GPLv2 along with this software; if not, see http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 #>
-Function Reset-PEDRAC 
+Function Reset-PEDRAC
 {
     [CmdletBinding(SupportsShouldProcess=$true,
                 ConfirmImpact='High',
@@ -15,14 +15,14 @@ Function Reset-PEDRAC
     [OutputType([Microsoft.Management.Infrastructure.CimInstance])]
     Param
     (
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ParameterSetName='General')]
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ParameterSetName='DRAC')]
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ParameterSetName='SSL')]
         [Alias("s")]
-        [ValidateNotNullOrEmpty()] 
+        [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
         [Parameter(ParameterSetName='General')]
@@ -41,13 +41,13 @@ Function Reset-PEDRAC
         [ValidateSet('Graceful','Forced')]
         [String] $ResetType = 'Graceful'
     )
-    
-    Begin 
+
+    Begin
     {
         $properties=@{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_iDRACCardService";Name="DCIM:iDRACCardService";}
         $instance = New-CimInstance -ClassName DCIM_iDRACCardService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
-        
-        if ($Force) 
+
+        if ($Force)
         {
             $ConfirmPreference = 'None'
         }
@@ -56,15 +56,15 @@ Function Reset-PEDRAC
             'Force' = [ResetType]$ResetType -as [int]
         }
 
-        if ($pscmdlet.ParameterSetName -eq 'DRAC') 
+        if ($pscmdlet.ParameterSetName -eq 'DRAC')
         {
-            $ResetMethod = 'iDRACResetCfg'    
-        } 
-        elseif ($pscmdlet.ParameterSetName -eq 'SSL') 
+            $ResetMethod = 'iDRACResetCfg'
+        }
+        elseif ($pscmdlet.ParameterSetName -eq 'SSL')
         {
             $ResetMethod = 'SSLResetCfg'
-        } 
-        else 
+        }
+        else
         {
             $ResetMethod = 'iDRACReset'
         }
@@ -72,26 +72,26 @@ Function Reset-PEDRAC
 
     Process
     {
-        if ($pscmdlet.ShouldProcess($iDRACsession.ComputerName, $ResetMethod)) 
+        if ($pscmdlet.ShouldProcess($iDRACsession.ComputerName, $ResetMethod))
         {
             Write-Verbose "Performing ${ResetMethod} on the target system $($iDRACsession)"
-            if ($pscmdlet.ParameterSetName -eq 'DRAC' -or $pscmdlet.ParameterSetName -eq 'General') 
+            if ($pscmdlet.ParameterSetName -eq 'DRAC' -or $pscmdlet.ParameterSetName -eq 'General')
             {
                 $return = Invoke-CimMethod -InputObject $instance -CimSession $iDRACsession -MethodName $ResetMethod -Arguments $Arguments
             }
-            else 
+            else
             {
                 $return = Invoke-CimMethod -InputObject $instance -CimSession $iDRACsession -MethodName $ResetMethod
             }
-            if ($return -ne 0) 
+            if ($return -ne 0)
             {
                 Write-Error $return.Message
-            } 
-            else 
+            }
+            else
             {
                 Write-Verbose 'Reset initiated ...'
             }
         }
-        
-    }    
+
+    }
 }

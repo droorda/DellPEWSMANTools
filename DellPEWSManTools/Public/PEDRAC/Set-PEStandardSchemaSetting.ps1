@@ -14,17 +14,17 @@ function Set-PEStandardSchemaSetting
                     ConfirmImpact='low')]
     Param
     (
-        [Parameter(Mandatory=$true, 
+        [Parameter(Mandatory=$true,
                    Position=0,
                    ParameterSetName='General')]
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    Position=0,
                    ParameterSetName='Wait')]
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    Position=0,
                    ParameterSetName='Passthru')]
         [ValidateNotNullOrEmpty()]
-        [Alias("s")] 
+        [Alias("s")]
         $iDRACSession,
 
         # global Catalog Server Address 1
@@ -68,8 +68,8 @@ function Set-PEStandardSchemaSetting
     Begin
     {
         $properties=@{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_iDRACCardService";Name="DCIM:iDRACCardService";}
-        $instance = New-CimInstance -ClassName DCIM_iDRACCardService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties 
-    
+        $instance = New-CimInstance -ClassName DCIM_iDRACCardService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
+
         $params=@{Target="iDRAC.Embedded.1"}
 
         $params.AttributeName=@()
@@ -78,7 +78,7 @@ function Set-PEStandardSchemaSetting
         $params.AttributeName += "ActiveDirectory.1#GlobalCatalog1"
         $params.AttributeValue += $globalCatalogServerAddress1
 
-        if ($globalCatalogServerAddress2) 
+        if ($globalCatalogServerAddress2)
         {
             $params.AttributeName += "ActiveDirectory.1#GlobalCatalog2"
             $params.AttributeValue += $globalCatalogServerAddress2
@@ -95,23 +95,23 @@ function Set-PEStandardSchemaSetting
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName),'set Standard schema setting'))
         {
             $responseData = Invoke-CimMethod -InputObject $instance -MethodName ApplyAttributes -CimSession $iDRACsession -Arguments $params #2>&1
-            if ($responseData.ReturnValue -eq 4096) 
+            if ($responseData.ReturnValue -eq 4096)
             {
-                if ($Passthru) 
+                if ($Passthru)
                 {
                     $responseData
-                } 
-                elseif ($Wait) 
+                }
+                elseif ($Wait)
                 {
                     Wait-PEConfigurationJob -iDRACSession $iDRACsession -JobID $responseData.Job.EndpointReference.InstanceID -Activity "Configuring Standard Schema Settings for $($iDRACsession.ComputerName)"
                     Write-Verbose "Standard Schema Configured successfully"
                 }
-            } 
-            else 
+            }
+            else
             {
                 Throw "Job Creation failed with error: $($responseData.Message)"
             }
         }
-        
+
     }
 }

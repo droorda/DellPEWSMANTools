@@ -9,7 +9,7 @@ This software is licensed to you under the GNU General Public License, version 2
 #>
 function Set-PEDRACUser
 {
-    [CmdletBinding(DefaultParameterSetName='General',  
+    [CmdletBinding(DefaultParameterSetName='General',
                   PositionalBinding=$false,
                   SupportsShouldProcess=$true,
                   ConfirmImpact='low')]
@@ -27,10 +27,10 @@ function Set-PEDRACUser
                    Position=0,
                    ParameterSetName='Passthru')]
         [ValidateNotNullOrEmpty()]
-        [Alias("s")] 
+        [Alias("s")]
         $iDRACSession,
 
-        # user number 
+        # user number
         [Parameter(ParameterSetName='General')]
         [Parameter(ParameterSetName='Wait')]
         [Parameter(ParameterSetName='Passthru')]
@@ -38,7 +38,7 @@ function Set-PEDRACUser
 		[String]
         $userNumber,
 
-        # Credential 
+        # Credential
         [Parameter(ParameterSetName='General')]
         [Parameter(ParameterSetName='Wait')]
         [Parameter(ParameterSetName='Passthru')]
@@ -47,7 +47,7 @@ function Set-PEDRACUser
         [System.Management.Automation.Credential()]
         $credential,
 
-        # user privilege 
+        # user privilege
         [Parameter(ParameterSetName='General')]
         [Parameter(ParameterSetName='Wait')]
         [Parameter(ParameterSetName='Passthru')]
@@ -96,9 +96,9 @@ function Set-PEDRACUser
             $password = $credential.GetNetworkCredential().Password
         }
         $properties=@{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_iDRACCardService";Name="DCIM:iDRACCardService";}
-        $instance = New-CimInstance -ClassName DCIM_iDRACCardService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties 
+        $instance = New-CimInstance -ClassName DCIM_iDRACCardService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
 
-        if ($enable -and $disable) 
+        if ($enable -and $disable)
         {
             Throw "ERROR: Enable and Disable cannot be done at the same time."
         }
@@ -112,42 +112,42 @@ function Set-PEDRACUser
 
         $blankInput = $true
 
-        if ($userName) 
+        if ($userName)
         {
             $params.AttributeName += $user + "UserName"
             $params.AttributeValue += $userName
             $blankInput = $false
         }
 
-        if ($password) 
+        if ($password)
         {
             $params.AttributeName += $user + "Password"
             $params.AttributeValue += $password
             $blankInput = $false
         }
 
-        if ($privilege) 
+        if ($privilege)
         {
             $params.AttributeName += $user + "Privilege"
             $params.AttributeValue += $privilege
             $blankInput = $false
         }
 
-        if ($enable) 
+        if ($enable)
         {
             $params.AttributeName += $user + "Enable"
             $params.AttributeValue += "Enabled"
             $blankInput = $false
-        } 
+        }
 
-        if ($disable) 
+        if ($disable)
         {
             $params.AttributeName += $user + "Enable"
             $params.AttributeValue += "Disabled"
             $blankInput = $false
         }
 
-        if ($blankInput) 
+        if ($blankInput)
         {
             Throw "ERROR: No arguments passed."
         }
@@ -157,13 +157,13 @@ function Set-PEDRACUser
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName), 'invoke method ApplyAttributes'))
         {
             $responseData = Invoke-CimMethod -InputObject $instance -MethodName ApplyAttributes -CimSession $iDRACsession -Arguments $params #2>&1
-            if ($responseData.ReturnValue -eq 4096) 
+            if ($responseData.ReturnValue -eq 4096)
             {
-                if ($Passthru) 
+                if ($Passthru)
                 {
                     $responseData
-                } 
-                elseif ($Wait) 
+                }
+                elseif ($Wait)
                 {
                     Wait-PEConfigurationJob -iDRACSession $iDRACsession -JobID $responseData.Job.EndpointReference.InstanceID -Activity "Configuring iDRAC user for $($iDRACsession.ComputerName)"
                     Write-Verbose "iDRAC User configured successfully"
@@ -172,7 +172,7 @@ function Set-PEDRACUser
                 Throw "Job Creation failed with error: $($responseData.Message)"
             }
         }
-        
+
     }
     End
     {

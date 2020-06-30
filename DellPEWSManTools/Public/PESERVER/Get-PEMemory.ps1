@@ -15,7 +15,7 @@ function Get-PEMemory
     (
         [Parameter(Mandatory)]
         [Alias("s")]
-        [ValidateNotNullOrEmpty()] 
+        [ValidateNotNullOrEmpty()]
         $iDRACSession
     )
 

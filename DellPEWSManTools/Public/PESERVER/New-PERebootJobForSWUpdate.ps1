@@ -49,7 +49,7 @@ function New-PERebootJobForSWUpdate
     {
         $properties=@{SystemCreationClassName="DCIM_ComputerSystem";SystemName="IDRAC:ID";CreationClassName="DCIM_SoftwareInstallationService";Name="SoftwareUpdate";}
         $instance = New-CimInstance -ClassName DCIM_SoftwareInstallationService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
-        
+
         $params=@{}
         $params.Add('RebootJobType',([ConfigJobRebootType]$RebootType -as [int]))
     }
@@ -58,19 +58,19 @@ function New-PERebootJobForSWUpdate
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName),'Create new reboot job for software update'))
         {
             $responseData = Invoke-CimMethod -InputObject $instance -MethodName CreateRebootJob -CimSession $iDRACSession -Arguments $params #2>&1
-            if ($responseData.ReturnValue -eq 4096) 
+            if ($responseData.ReturnValue -eq 4096)
             {
-                if ($Passthru) 
+                if ($Passthru)
                 {
                     $responseData
-                } 
-                elseif ($Wait) 
+                }
+                elseif ($Wait)
                 {
                     Wait-PEConfigurationJob -iDRACSession $iDRACSession -JobID $responseData.RebootJobID.EndpointReference.InstanceID -Activity "Rebooting for Software Update for $($iDRACSession.ComputerName)"
                     Write-Verbose "Reboot for Software Update done successfully"
                 }
-            } 
-            else 
+            }
+            else
             {
                 Throw "Job Creation failed with error: $($responseData.Message)"
             }

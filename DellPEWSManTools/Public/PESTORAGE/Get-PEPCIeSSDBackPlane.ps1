@@ -17,7 +17,7 @@ function Get-PEPCIeSSDBackPlane
         $iDRACSession
     )
 
-    Process 
+    Process
     {
         $ssdExtender = Get-CimInstance -ClassName DCIM_PCIeSSDBackPlaneView -Namespace root\dcim -CimSession $idracsession -Verbose
         return $ssdExtender

@@ -7,7 +7,7 @@ Copyright (c) 2017, Dell, Inc.
 
 This software is licensed to you under the GNU General Public License, version 2 (GPLv2). There is NO WARRANTY for this software, express or implied, including the implied warranties of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. You should have received a copy of GPLv2 along with this software; if not, see http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 #>
-Function New-PETargetedConfigurationJob 
+Function New-PETargetedConfigurationJob
 {
     [CmdletBinding(DefaultParameterSetName='General',
                     SupportsShouldProcess=$true,
@@ -21,9 +21,9 @@ Function New-PETargetedConfigurationJob
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
+                   ValueFromPipelineByPropertyName=$true,
                    ValueFromRemainingArguments=$false,
                    ParameterSetName='General')]
         [Parameter(ParameterSetName='Passthru')]
@@ -64,46 +64,46 @@ Function New-PETargetedConfigurationJob
         [Switch] $Passthru
     )
 
-    Begin 
+    Begin
     {
         $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_RAIDService";Name="DCIM:RAIDService";}
-        $instance = New-CimInstance -ClassName DCIM_RAIDService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties        
+        $instance = New-CimInstance -ClassName DCIM_RAIDService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
         $Parameters = @{
             Target = $InstanceID
             ScheduledStartTime = $StartTime
             Realtime = [Jobtype]$JobType -as [int]
         }
 
-        if (-not ($RebootType -eq 'None')) 
+        if (-not ($RebootType -eq 'None'))
         {
             $Parameters.Add('RebootJobType',([ConfigJobRebootType]$RebootType -as [int]))
         }
 
-        if ($UntilTime) 
+        if ($UntilTime)
         {
             $Parameters.Add('UntilTime',$UntilTime)
         }
         $Parameters
     }
 
-    Process 
+    Process
     {
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName),'create targeted configuration job'))
         {
             $Job = Invoke-CimMethod -InputObject $instance -MethodName CreateTargetedConfigJob -CimSession $idracsession -Arguments $Parameters
-            if ($Job.ReturnValue -eq 4096) 
+            if ($Job.ReturnValue -eq 4096)
             {
-                if ($PSCmdlet.ParameterSetName -eq 'Passthru') 
+                if ($PSCmdlet.ParameterSetName -eq 'Passthru')
                 {
                     $Job
-                } 
-                elseif ($PSCmdlet.ParameterSetName -eq 'Wait') 
+                }
+                elseif ($PSCmdlet.ParameterSetName -eq 'Wait')
                 {
                     Write-Verbose 'Starting configuration job ...'
-                    Wait-PEConfigurationJob -JobID $Job.Job.EndpointReference.InstanceID -Activity 'Performing RAID Configuration ..'                
+                    Wait-PEConfigurationJob -JobID $Job.Job.EndpointReference.InstanceID -Activity 'Performing RAID Configuration ..'
                 }
-            } 
-            else 
+            }
+            else
             {
                 Write-Error $Job.Message
             }

@@ -17,7 +17,7 @@ function Set-PEDRACAttribute {
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
-        
+
         # Sepcify the name of the attribute name to be set
         [Parameter()]
         [String] $GroupID,
@@ -30,13 +30,13 @@ function Set-PEDRACAttribute {
         # Pending or Current value to be set
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [String[]] $AttributeValue        
-    ) 
+        [String[]] $AttributeValue
+    )
 
     Begin {
         #$CimOptions = New-CimSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck -Encoding Utf8 -UseSsl
         $properties=@{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_iDRACCardService";Name="DCIM:iDRACCardService";}
-        $instance = New-CimInstance -ClassName DCIM_iDRACCardService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties 
+        $instance = New-CimInstance -ClassName DCIM_iDRACCardService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
     }
 
     Process {
@@ -44,10 +44,10 @@ function Set-PEDRACAttribute {
             #Check if the attribute is settable.
             Write-Verbose "Get-PEDRACAttribute -iDRACSession $iDRACSession -GroupID $GroupID -AttributeName $AttributeName #-Verbose"
             $attribute = Get-PEDRACAttribute -iDRACSession $iDRACSession -GroupID $GroupID -AttributeName $AttributeName #-Verbose
-            
+
             if ($attribute) {
                 if ($attribute.IsReadOnly -eq 'false') {
-                    
+
                     #Check if the AttributeValue falls in the same set as the PossibleValues by calling the helper function
                     if ($attribute.PossibleValues) {
                         Write-Verbose "verifying PEiDRAC attribute information ..."

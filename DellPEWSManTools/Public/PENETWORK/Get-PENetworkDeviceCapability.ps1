@@ -15,17 +15,17 @@ function Get-PENetworkDeviceCapability
     (
         [Parameter(Mandatory)]
         [Alias("s")]
-        [ValidateNotNullOrEmpty()] 
+        [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
         [Parameter()]
         [String] $FQDD
     )
 
-    Process 
+    Process
     {
         Write-Verbose "Getting Network device capabilities for $($iDRACSession.ComputerName) ..."
-        
+
         if ($FQDD)
         {
             $filter = "FQDD='$FQDD'"
@@ -35,6 +35,6 @@ function Get-PENetworkDeviceCapability
             $filter = $null
         }
         Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_NICCapabilities -Namespace root\dcim -Filter $filter
-    
+
     }
 }

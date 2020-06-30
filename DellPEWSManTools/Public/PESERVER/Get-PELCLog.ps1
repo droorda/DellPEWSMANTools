@@ -32,18 +32,18 @@ function Get-PELCLog
                    ParameterSetName='SharePassThru')]
         [Parameter(Mandatory,
                    Position=0,
-                   ParameterSetName='Filter')]                    
+                   ParameterSetName='Filter')]
         [Parameter(Mandatory,
                    Position=0,
-                   ParameterSetName='ExportWait')]                    
+                   ParameterSetName='ExportWait')]
         [Parameter(Mandatory,
                    Position=0,
                    ParameterSetName='ExportPassthru')]
         [Parameter(Mandatory,
                    Position=0,
-                   ParameterSetName='NoPassthruWait')]                    
+                   ParameterSetName='NoPassthruWait')]
         [ValidateNotNullOrEmpty()]
-        [Alias("s")]                
+        [Alias("s")]
         $iDRACSession,
 
         [Parameter(ParameterSetName="Filter")]
@@ -55,7 +55,7 @@ function Get-PELCLog
         [Alias ("agent")]
 		[String]
         $AgentID,
-    
+
         [Parameter(ParameterSetName="Filter")]
         [Alias ("cat")]
 		[String]
@@ -149,20 +149,20 @@ function Get-PELCLog
             $filtered = $false
             $query="Select * from DCIM_LCLogEntry"
 
-            if ($RecordID) 
+            if ($RecordID)
             {
-                if (-not $filtered) 
+                if (-not $filtered)
                 {
                     $query += " WHERE RecordID='$RecordID'"
                     $filtered = $true
-                } 
-                else 
+                }
+                else
                 {
                     $query += " AND RecordID='$RecordID'"
                 }
             }
 
-            if ($AgentID) 
+            if ($AgentID)
             {
                 if (-not $filtered) {
                     $query += " WHERE AgentID='$AgentID'"
@@ -172,43 +172,43 @@ function Get-PELCLog
                 }
             }
 
-            if ($Category) 
+            if ($Category)
             {
-                if (-not $filtered) 
+                if (-not $filtered)
                 {
                     $query += " WHERE Category='$Category'"
                     $filtered = $true
                 }
-                else 
+                else
                 {
                     $query += " AND Category='$Category'"
                 }
             }
 
-            if ($Severity) 
+            if ($Severity)
             {
-                if (-not $filtered) 
+                if (-not $filtered)
                 {
                     $query += " WHERE PerceivedSeverity='$Severity'"
                     $filtered = $true
-                } 
-                else 
+                }
+                else
                 {
                     $query += " AND PerceivedSeverity='$Severity'"
                 }
             }
-        else 
+        else
         {
             $properties=@{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_LCService";Name="DCIM:LCService";}
             $instance = New-CimInstance -ClassName DCIM_LCService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
-             
+
             $Parameters=@{}
 
-            if ($ShareObject) 
+            if ($ShareObject)
             {
                 $Parameters = $ShareObject.Clone()
-            } 
-            else 
+            }
+            else
             {
                 $Parameters = @{
                     IPAddress = $IPAddress
@@ -216,11 +216,11 @@ function Get-PELCLog
                     ShareType = ([ShareType]$ShareType -as [int])
                 }
 
-                if ($Credential) 
+                if ($Credential)
                 {
                     $Parameters.Add('Username',$Credential.GetNetworkCredential().UserName)
                     $Parameters.Add('Password',$Credential.GetNetworkCredential().Password)
-                    if ($Credential.GetNetworkCredential().Domain) 
+                    if ($Credential.GetNetworkCredential().Domain)
                     {
                         $Parameters.Add('Workgroup',$Credential.GetNetworkCredential().Domain)
                     }
@@ -238,32 +238,32 @@ function Get-PELCLog
             Write-Verbose "Retrieving only filtered logs with a query ${query}..."
             $responseData = Get-CimInstance -CimSession $iDRACSession -ResourceUri "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/DCIM_LCLogEntry" -Namespace "root/dcim" -Query $query -QueryDialect "http://schemas.dmtf.org/wbem/cql/1/dsp0202.pdf"
             $responseData
-        } 
-        else 
+        }
+        else
         {
             Write-Verbose "Exporting Lifecycle Log from $($iDRACSession.ComputerName) to $($Parameters.FileName)"
-            if ( $ExportType -eq 'ActiveLogs' ) 
+            if ( $ExportType -eq 'ActiveLogs' )
             {
                 $responseData = Invoke-CimMethod -InputObject $instance -MethodName ExportLCLog -CimSession $iDRACSession -Arguments $Parameters
-            } 
-            else 
+            }
+            else
             {
                 $responseData = Invoke-CimMethod -InputObject $instance -MethodName ExportCompleteLCLog -CimSession $iDRACSession -Arguments $Parameters
             }
 
-            if ($responseData.ReturnValue -eq 4096) 
+            if ($responseData.ReturnValue -eq 4096)
             {
-                if ($Passthru) 
+                if ($Passthru)
                 {
                     $responseData
-                } 
-                elseif ($Wait) 
+                }
+                elseif ($Wait)
                 {
                     Wait-PEConfigurationJob -iDRACSession $iDRACSession -JobID $responseData.Job.EndpointReference.InstanceID -Activity "Exporting Lifecycle Log for $($iDRACSession.ComputerName)"
                     Write-Verbose "Exporting Lifecycle Log from $($iDRACSession.ComputerName) to $($Parameters.FileName) was successful"
                 }
-            } 
-            else 
+            }
+            else
             {
                 Throw "Job Creation failed with error: $($responseData.Message)"
             }

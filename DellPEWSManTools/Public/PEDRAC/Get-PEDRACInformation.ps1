@@ -15,7 +15,7 @@ function Get-PEDRACInformation
     (
         [Parameter(Mandatory)]
         [Alias("s")]
-        [ValidateNotNullOrEmpty()] 
+        [ValidateNotNullOrEmpty()]
         $iDRACSession
     )
 

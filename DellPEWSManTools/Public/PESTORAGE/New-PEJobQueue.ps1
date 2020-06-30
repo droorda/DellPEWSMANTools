@@ -7,7 +7,7 @@ Copyright (c) 2017, Dell, Inc.
 
 This software is licensed to you under the GNU General Public License, version 2 (GPLv2). There is NO WARRANTY for this software, express or implied, including the implied warranties of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. You should have received a copy of GPLv2 along with this software; if not, see http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 #>
-Function New-PEJobQueue 
+Function New-PEJobQueue
 {
     [CmdletBinding(SupportsShouldProcess=$true,ConfirmImpact='low')]
 
@@ -17,9 +17,9 @@ Function New-PEJobQueue
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true, 
+                   ValueFromPipelineByPropertyName=$true,
                    ValueFromRemainingArguments=$false)]
         [string]$JobID,
 
@@ -30,22 +30,22 @@ Function New-PEJobQueue
         [string]$UntilTime
     )
 
-    Begin 
+    Begin
     {
         $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="Idrac";CreationClassName="DCIM_JobService";Name="JobService";}
-        $instance = New-CimInstance -ClassName DCIM_JobService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties        
+        $instance = New-CimInstance -ClassName DCIM_JobService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
         $Parameters = @{
             JobArray = $JobID
             StartTimeInterval = $StartTimeInterval
         }
 
-        if ($UntilTime) 
+        if ($UntilTime)
         {
             $Parameters.Add('UntilTime',$UntilTime)
         }
     }
 
-    Process 
+    Process
     {
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName),'Create job queue'))
         {
@@ -57,6 +57,6 @@ Function New-PEJobQueue
             #    $Job
             #}
         }
-        
+
     }
 }

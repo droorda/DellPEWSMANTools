@@ -17,7 +17,7 @@ function Get-PEPCIeSSDExtender
         $iDRACSession
     )
 
-    Process 
+    Process
     {
         $ssdExtender = Get-CimInstance -ClassName DCIM_PCIeSSDExtenderView -Namespace root\dcim -CimSession $idracsession -Verbose
         return $ssdExtender

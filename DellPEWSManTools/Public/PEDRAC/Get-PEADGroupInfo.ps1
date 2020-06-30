@@ -9,17 +9,17 @@ This software is licensed to you under the GNU General Public License, version 2
 #>
 function Get-PEADGroupInfo
 {
-    [CmdletBinding(DefaultParameterSetName='General',  
+    [CmdletBinding(DefaultParameterSetName='General',
                   PositionalBinding=$false)]
     [OutputType([System.Collections.HashTable])]
     Param
     (
         # iDRAC Session
-        [Parameter(Mandatory=$true, 
+        [Parameter(Mandatory=$true,
                    Position=0,
                    ParameterSetName='General')]
         [ValidateNotNullOrEmpty()]
-        [Alias("s")] 
+        [Alias("s")]
         $iDRACSession
     )
 
@@ -28,10 +28,10 @@ function Get-PEADGroupInfo
     }
     Process
     {
-        
+
         Write-Verbose "Retrieving AD Group Information for $($iDRACsession.ComputerName)"
         $map = @{}
-        $users = 1..5 | Foreach-Object -Process {"ADGroup"+$_} 
+        $users = 1..5 | Foreach-Object -Process {"ADGroup"+$_}
         foreach ($user in $users)
         {
             $map.$user = @{"Privilege"="";"Domain"="";"Name"=""}

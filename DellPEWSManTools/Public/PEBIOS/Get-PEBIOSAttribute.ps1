@@ -28,7 +28,7 @@ function Get-PEBIOSAttribute
 
         [Parameter()]
         [String] $GroupDisplayName
-    ) 
+    )
 
     Begin
     {

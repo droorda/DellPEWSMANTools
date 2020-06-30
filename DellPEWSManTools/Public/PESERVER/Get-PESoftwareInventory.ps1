@@ -17,7 +17,7 @@ function  Get-PESoftwareInventory
         [Parameter(Mandatory, ParameterSetName='Installed')]
         [Parameter(Mandatory, ParameterSetName='Available')]
         [Alias("s")]
-        [ValidateNotNullOrEmpty()] 
+        [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
         [Parameter(ParameterSetName='Installed')]

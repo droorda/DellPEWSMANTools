@@ -15,10 +15,10 @@ function Get-PENetworkDevice
     (
         [Parameter(Mandatory)]
         [Alias("s")]
-        [ValidateNotNullOrEmpty()] 
+        [ValidateNotNullOrEmpty()]
         $iDRACSession
     )
-    Process 
+    Process
     {
         Write-Verbose "Getting Network device Information for $($iDRACSession.ComputerName) ..."
         Get-CimInstance -ClassName DCIM_NICView -Namespace 'root\dcim' -CimSession $iDRACSession

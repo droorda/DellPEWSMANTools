@@ -9,13 +9,13 @@ This software is licensed to you under the GNU General Public License, version 2
 #>
 Function Find-PEDRAC
 {
-    [CmdletBinding(DefaultParameterSetName='General',  
+    [CmdletBinding(DefaultParameterSetName='General',
                   PositionalBinding=$false)]
     [OutputType([System.Collections.Hashtable])]
     Param
     (
-        #ipStartRange 
-        [Parameter(Mandatory, 
+        #ipStartRange
+        [Parameter(Mandatory,
                    ParameterSetName='General')]
         [ValidateScript({[System.Net.IPAddress]::TryParse($_,[ref]$null)})]
         [Alias ("ips")]
@@ -23,15 +23,15 @@ Function Find-PEDRAC
         $ipStartRange,
 
         # ipEndRange
-        [Parameter(Mandatory, 
+        [Parameter(Mandatory,
                    ParameterSetName='General')]
         [ValidateScript({[System.Net.IPAddress]::TryParse($_,[ref]$null)})]
         [Alias ("ipe")]
         [String]
         $ipEndRange,
-        
+
         # Credential
-        [Parameter(Mandatory=$true, 
+        [Parameter(Mandatory=$true,
                    ParameterSetName='General')]
         [Alias ("cred")]
         [PSCredential]
@@ -44,7 +44,7 @@ Function Find-PEDRAC
         [switch]
         $deepDiscover
     )
-    
+
     Begin
     {
         function Find-PEDRAC_
