@@ -2,25 +2,27 @@
 Get-PEConfigurationJobStatus.ps1 - GET PE configuration job status.
 
 _author_ = Ravikanth Chaganti <Ravikanth_Chaganti@Dell.com> _version_ = 1.0
+_Updated_= Doug Roorda <droorda at gmail.com> = 1.1
 
 Copyright (c) 2017, Dell, Inc.
 
 This software is licensed to you under the GNU General Public License, version 2 (GPLv2). There is NO WARRANTY for this software, express or implied, including the implied warranties of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. You should have received a copy of GPLv2 along with this software; if not, see http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
 #>
-Function Get-PEConfigurationJobStatus 
+Function Get-PEConfigurationJobStatus
 {
     [CmdletBinding(DefaultParameterSetName='General')]
     param (
         [Parameter(Mandatory,
-                   ParameterSetName='General')]
+                ParameterSetName='General')]
         [Parameter(Mandatory,
-                   ParameterSetName='Wait')]
+                ParameterSetName='Wait')]
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
-        [Parameter(Mandatory,
+        [Parameter(Mandatory=$false,
                     ParameterSetName='General')]
-        [Parameter(Mandatory,ParameterSetName='Wait')]
+        [Parameter(Mandatory,
+	            ParameterSetName='Wait')]
         [String]$JobID,
 
         [Parameter(ParameterSetName='Wait')]
@@ -29,25 +31,30 @@ Function Get-PEConfigurationJobStatus
 
     Process
     {
-        try 
+        try
         {
             #$job = Get-CimInstance -CimSession $iDRACSession -ResourceUri "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/DCIM_LifecycleJob" -Namespace "root/dcim" -Query "SELECT * FROM DCIM_LifecycleJob Where InstanceID='$JobID'"
-            $job = Get-CimInstance -CimSession $iDRACSession -Namespace "root/dcim" -ClassName DCIM_LifecycleJob -Filter "InstanceID='$JobID'" -ErrorAction Stop
-            if ($job) 
+            if ($JobID){
+                $job = Get-CimInstance -CimSession $iDRACSession -Namespace "root/dcim" -ClassName DCIM_LifecycleJob -Filter "InstanceID='$JobID'" -ErrorAction Stop
+            } else {
+                $job = Get-CimInstance -CimSession $iDRACSession -Namespace "root/dcim" -ClassName DCIM_LifecycleJob -ErrorAction Stop
+            }
+            if ($job)
             {
-                if ($Wait) 
+                if ($Wait)
                 {
                     Wait-PEConfigurationJob -JobID $JobID -iDRACSession $iDRACSession -Activity 'Waiting for Job ...'
-                } 
-                else 
+                }
+                else
                 {
                     $job
                 }
             }
         }
-        catch 
+        catch
         {
-            Write-Error $_            
+            write-warning "Error Getting jobStatus"
+            $PSCmdlet.ThrowTerminatingError($PSItem)
         }
     }
 }

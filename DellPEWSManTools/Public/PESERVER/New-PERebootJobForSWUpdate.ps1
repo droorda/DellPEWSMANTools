@@ -9,25 +9,25 @@ This software is licensed to you under the GNU General Public License, version 2
 #>
 function New-PERebootJobForSWUpdate
 {
-    [CmdletBinding(DefaultParameterSetName='General',  
-                  PositionalBinding=$false,
-                  SupportsShouldProcess=$true,
-                  ConfirmImpact='low')]
+    [CmdletBinding( DefaultParameterSetName='General',
+                    PositionalBinding=$false,
+                    SupportsShouldProcess=$true,
+                    ConfirmImpact='low')]
     [OutputType([String])]
     Param
     (
         # iDRAC Session Object
-        [Parameter(Mandatory=$true,
-                   Position=0,
-                   ParameterSetName='General')]
-        [Parameter(Mandatory,
-                   Position=0,
-                   ParameterSetName='Wait')]
-        [Parameter(Mandatory,
-                   Position=0,
-                   ParameterSetName='Passthru')]
+        [Parameter( Mandatory=$true,
+                    Position=0,
+                    ParameterSetName='General')]
+        [Parameter( Mandatory,
+                    Position=0,
+                    ParameterSetName='Wait')]
+        [Parameter( Mandatory,
+                    Position=0,
+                    ParameterSetName='Passthru')]
         [ValidateNotNullOrEmpty()]
-        [Alias("s")] 
+        [Alias("s")]
         $iDRACSession,
 
         [Parameter(ParameterSetName='General')]
@@ -67,7 +67,7 @@ function New-PERebootJobForSWUpdate
                 elseif ($Wait) 
                 {
                     Wait-PEConfigurationJob -iDRACSession $iDRACSession -JobID $responseData.RebootJobID.EndpointReference.InstanceID -Activity "Rebooting for Software Update for $($iDRACSession.ComputerName)"
-                    Write-Verbose "Reboot for Software Update done seccessfully"
+                    Write-Verbose "Reboot for Software Update done successfully"
                 }
             } 
             else 

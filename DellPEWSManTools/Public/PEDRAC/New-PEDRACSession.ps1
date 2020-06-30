@@ -2,6 +2,7 @@
 New-PEDRACSession.ps1 - Creates a new PE DRAC session.
 
 _author_ = Ravikanth Chaganti <Ravikanth_Chaganti@Dell.com> _version_ = 1.0
+_updated_ - Doug Roorda <droorda@gmail.com> _version_ = 1.1
 
 Copyright (c) 2017, Dell, Inc.
 
@@ -19,18 +20,49 @@ function New-PEDRACSession
 
         [Parameter (Mandatory,
                     ValueFromPipeline=$true,
-                    ValueFromPipelineByPropertyName=$true, 
-                    ValueFromRemainingArguments=$false)]
+                    ValueFromPipelineByPropertyName=$true,
+                    ValueFromRemainingArguments=$false,
+                    ParameterSetName='ByIP')]
         [ValidateScript({[System.Net.IPAddress]::TryParse($_,[ref]$null)})]
         [string] $IPAddress,
+
+        [Parameter (Mandatory,
+                    ValueFromPipeline=$true,
+                    ValueFromPipelineByPropertyName=$true,
+                    ValueFromRemainingArguments=$false,
+                    ParameterSetName='ByName')]
+        [ValidateScript({
+                        try {
+                            if ([System.Net.DNS]::GetHostByName($_).AddressList.IPAddressToString.count -gt 0) {$true} else {$false}
+                        } catch {
+                            $false
+                        }
+                    })]
+        [string] $HostName,
+
+        [Parameter (
+                    ParameterSetName='ByName')]
+        [switch] $IgnoreCertFailures,
+
 
         [Parameter()]
         [int] $MaxTimeout = 60
     )
 
-    Begin
-    {
-        $cimOptions = New-CimSessionOption -SkipCACheck -SkipCNCheck -SkipRevocationCheck -Encoding Utf8 -UseSsl
+    Begin {
+        $Params = @{
+            Encoding = 'Utf8'
+            UseSsl = $true
+        }
+        if ($IPAddress -or $IgnoreCertFailures) 
+        {
+            $Params.SkipCACheck = $true
+            $Params.SkipCNCheck = $true
+            $Params.SkipRevocationCheck = $true
+        }
+
+        $ComputerName = $HostName
+        $cimOptions   = New-CimSessionOption @Params
     }
 
     Process
@@ -41,21 +73,28 @@ function New-PEDRACSession
         {
             try
             {
-                $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $IPAddress -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $MaxTimeout -ErrorAction Stop
-                if ($session)
-                {
-                    $sysInfo = Get-PESystemInformation -iDRACSession $Session
-                    Add-Member -inputObject $Session -Name SystemGeneration -Value $([int](([regex]::Match($sysInfo.SystemGeneration,'\d+')).groups[0].Value)) -MemberType NoteProperty
-                    Add-Member -inputObject $Session -Name SystemType -Value $([regex]::Match($sysInfo.SystemGeneration,'(?<=\s).*').groups[0].Value) -MemberType NoteProperty
-                    return $session     
+                $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $MaxTimeout -ErrorAction Stop
+            } catch {
+                try {
+                    sleep -s 10
+                    $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $MaxTimeout -ErrorAction Stop
+                } catch {
+                    try {
+                        sleep -s 60
+                        $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $MaxTimeout -ErrorAction Stop
+                    } catch {
+                        Throw "New-PEDRACSession Failed : $($_.Exception.Message)"
+                    }
                 }
             }
-            catch
+            if ($session)
             {
-                Write-Error -Message $_
+                $sysInfo = Get-PESystemInformation -iDRACSession $Session
+                Add-Member -inputObject $Session -Name SystemGeneration -Value $([int](([regex]::Match($sysInfo.SystemGeneration,'\d+')).groups[0].Value)) -MemberType NoteProperty
+                Add-Member -inputObject $Session -Name SystemType -Value $([regex]::Match($sysInfo.SystemGeneration,'(?<=\s).*').groups[0].Value) -MemberType NoteProperty
+                return $session
             }
         }
-        
     }
 
     End

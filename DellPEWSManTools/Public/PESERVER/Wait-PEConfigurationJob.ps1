@@ -51,10 +51,15 @@ Function Wait-PEConfigurationJob
         } 
         else 
         {
-            Throw "Job creation failed with an error: $($jobstatus.Message). Use 'Get-PEConfigurationResult -JobID $($jobstatus.Job.EndpointReference.InstanceID)' to receive detailed configuration result"
+            if ($jobstatus.Job.EndpointReference.InstanceID){
+                Throw "Job creation failed with an error: $($jobstatus.Message). Use 'Get-PEConfigurationResult -JobID $($jobstatus.Job.EndpointReference.InstanceID)' to receive detailed configuration result"
+            } else {
+                Throw "Job failed with an error: $($jobstatus.Message)."
+            }
         }
         
         Write-Progress -activity "Job Status: $($JobStatus.Message)" -status "$PercentComplete % Complete:" -percentcomplete $PercentComplete
         Start-Sleep 1
     }
+    Write-Progress -activity "Job Status: $($JobStatus.Message)" -Completed
 }

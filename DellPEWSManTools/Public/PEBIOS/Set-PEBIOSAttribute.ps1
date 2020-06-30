@@ -2,6 +2,7 @@
 Set-PEBIOSAttribute.ps1 - Sets BIOS attributes
 
 _author_ = Ravikanth Chaganti <Ravikanth_Chaganti@Dell.com> _version_ = 1.0
+_Updated_= Doug Roorda <droorda at gmail.com> = 1.1
 
 Copyright (c) 2017, Dell, Inc.
 
@@ -23,7 +24,7 @@ function Set-PEBIOSAttribute
 
         [Parameter()]
         [String[]] $AttributeValue
-    ) 
+    )
 
     Begin
     {
@@ -37,64 +38,70 @@ function Set-PEBIOSAttribute
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName),'Set BIOS attribute'))
         {
             #Check if the attribute is settable.
-            $attribute = Get-PEBIOSAttribute -iDRACSession $iDRACSession -AttributeName $AttributeName -Verbose
-            
+            $attribute = Get-PEBIOSAttribute -iDRACSession $iDRACSession -AttributeName $AttributeName #-Verbose
+
             if ($attribute)
             {
-                if ($attribute.IsReadOnly -eq 'false')
+                if ($attribute.CurrentValue -eq $AttributeValue) {
+                    Write-warning -Message "Current Value is already correct"
+                    return [PSCustomObject]@{Result = $false ; RebootRequired  = $false}
+                }
+                if ($attribute.PendingValue -eq $AttributeValue) {
+                    Write-warning -Message "Pending Value is already correct"
+                    return [PSCustomObject]@{Result = $true ; RebootRequired  = $true}
+                }
+                if ($attribute.IsReadOnly -eq $true) {
+                    Write-warning -Message "${AttributeName} is readonly and cannot be configured."
+                    return [PSCustomObject]@{Result = $false ; RebootRequired  = $false}
+                }
+
+                Write-Verbose "setting PEBIOS attribute information ..."
+
+                #Check if the AttributeValue falls in the same set as the PossibleValues by calling the helper function
+                if (TestPossibleValuesContainAttributeValues -PossibleValues $attribute.PossibleValues -AttributeValues $AttributeValue )
                 {
-                    Write-Verbose "setting PEBIOS attribute information ..."
-
-                    #Check if the AttributeValue falls in the same set as the PossibleValues by calling the helper function
-                    if (TestPossibleValuesContainAttributeValues -PossibleValues $attribute.PossibleValues -AttributeValues $AttributeValue )
+                    if ($PSCmdlet.ShouldProcess($AttributeValue, 'Set BIOS attribute'))
                     {
-                        if ($PSCmdlet.ShouldProcess($AttributeValue, 'Set BIOS attribute'))
+                        try
                         {
-
-                            try
+                            $params = @{
+                                'Target'         = 'BIOS.Setup.1-1'
+                                'AttributeName'  = $AttributeName
+                                'AttributeValue' = $AttributeValue
+                            }
+                            $responseData = Invoke-CimMethod -InputObject $instance -MethodName SetAttribute -CimSession $iDRACsession -Arguments $params
+                            if ($responseData.ReturnValue -eq 0)
                             {
-                                $params = @{
-                                    'Target'         = 'BIOS.Setup.1-1'
-                                    'AttributeName'  = $AttributeName
-                                    'AttributeValue' = $AttributeValue
-                                }
-
-                                $responseData = Invoke-CimMethod -InputObject $instance -MethodName SetAttribute -CimSession $iDRACsession -Arguments $params
-                                if ($responseData.ReturnValue -eq 0)
+                                Write-Verbose -Message 'BIOS attribute configured successfully'
+                                if ($responseData.RebootRequired -eq 'Yes')
                                 {
-                                    Write-Verbose -Message 'BIOS attribute configured successfully'
-                                    if ($responseData.RebootRequired -eq 'Yes')
-                                    {
-                                        Write-Verbose -Message 'BIOS attribute change requires reboot.'
-                                    }
-                                }
-                                else
-                                {
-                                    Write-Warning -Message "BIOS attribute change failed: $($responseData.Message)"
+                                    Write-Verbose -Message 'BIOS attribute change requires reboot.'
                                 }
                             }
-                            catch
+                            else
                             {
-                                Write-Error -Message $_
+                                Write-Warning -Message "BIOS attribute change failed: $($responseData.Message)"
                             }
                         }
-                        
-                    }
-                    else
-                    {
-                        Write-Error -Message "Attribute value `"${AttributeValue}`" is not valid for attribute ${AttributeName}."
+                        catch
+                        {
+                            Write-Error -Message $_
+                        }
                     }
                 }
                 else
                 {
-                    Write-Error -Message "${AttributeName} is readonly and cannot be configured."
+                    Write-warning -Message "Attribute value `"${AttributeValue}`" is not valid for attribute ${AttributeName}."
                 }
             }
             else
             {
+                write-Verbose "Get-PEBIOSAttribute -iDRACSession $iDRACSession -AttributeName $AttributeName -Verbose"
+                write-Verbose "$(Get-PEBIOSAttribute -iDRACSession $iDRACSession -AttributeName $AttributeName -Verbose)"
                 Write-Error -Message "${AttributeName} does not exist in PEBIOS attributes."
             }
         }
+        return [PSCustomObject]@{Result = $false ; RebootRequired  = $false}
     }
 
     End

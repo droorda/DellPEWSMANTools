@@ -19,45 +19,59 @@ function Get-PESystemAttribute
         $iDRACSession,
 
         [Parameter()]
-        [String] $AttributeDisplayName,
+        [String] $GroupID,
 
         [Parameter()]
-        [String] $GroupDisplayName
-    ) 
-       
+        [String] $GroupDisplayName,
+
+        [Parameter()]
+        [String] $AttributeName,
+
+        [Parameter()]
+        [String] $AttributeDisplayName
+
+    )
+
     Begin
     {
-        
+
     }
 
     Process
     {
         Write-Verbose "Retrieving PE Systme attribute information ..."
-        try
-        {
-            if ($AttributeDisplayName -and $GroupDisplayName)
-            {
-
-                $filter = "AttributeDisplayName='$AttributeDisplayName' AND GroupDisplayName='$GroupDisplayName'"
-            }
-            elseif ($GroupDisplayName)
-            {
+        $filter = $null
+        if ($GroupID) {
+            $filter = "GroupID='$GroupID'"
+        }
+        if ($GroupDisplayName) {
+            if ($filter) {
+                $filter = "$filter AND GroupDisplayName='$GroupDisplayName'"
+            } else {
                 $filter = "GroupDisplayName='$GroupDisplayName'"
             }
-            elseif ($AttributeDisplayName)
-            {
+        }
+        if ($AttributeDisplayName) {
+            if ($filter) {
+                $filter = "$filter AND AttributeDisplayName='$AttributeDisplayName'"
+            } else {
                 $filter = "AttributeDisplayName='$AttributeDisplayName'"
             }
-            else
-            {
-                $filter = $null
+        }
+        if ($AttributeName) {
+            if ($filter) {
+                $filter = "$filter AND AttributeName='$AttributeName'"
+            } else {
+                $filter = "AttributeName='$AttributeName'"
             }
+        }
 
-            Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_SystemEnumeration -Namespace root\dcim -Filter $filter
+        Try {
+            Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_SystemAttribute -Namespace root\dcim -Filter $filter -ErrorAction Stop
         }
         catch
         {
-            Write-Error -Message $_
+            $PSCmdlet.ThrowTerminatingError($PSItem)
         }
     }
 

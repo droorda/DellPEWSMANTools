@@ -2,6 +2,7 @@
 Set-PELCAttribute.ps1 - Sets PE system LC attribute.
 
 _author_ = Ravikanth Chaganti <Ravikanth_Chaganti@Dell.com> _version_ = 1.0
+_Updated_= Doug Roorda <droorda at gmail.com> = 1.1
 
 Copyright (c) 2017, Dell, Inc.
 
@@ -30,7 +31,7 @@ function Set-PELCAttribute
     Begin
     {
         $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_LCService";Name="DCIM:LCService";}
-            $instance = New-CimInstance -ClassName DCIM_LCService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
+        $instance = New-CimInstance -ClassName DCIM_LCService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
     }
 
     Process
@@ -38,45 +39,41 @@ function Set-PELCAttribute
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName),'Set LC attribute'))
         {
             #Check if the attribute is settable.
-            $attribute = Get-PELCAttribute -iDRACSession $iDRACSession -AttributeName $AttributeName -Verbose
+            $attribute = Get-PELCAttribute -iDRACSession $iDRACSession -AttributeName $AttributeName #-Verbose
             
             if ($attribute)
             {
                 if ($attribute.IsReadOnly -eq 'false')
                 {
-                    Write-Verbose "setting PEBIOS attribute information ..."
+                    Write-Verbose "setting PELC attribute information ..."
 
-                    #Check if the AttributeValue falls in the same set as the PossibleValues, call the helper function
+                    #Check if the AttributeValue falls in the same set as the PossibleValues by calling the helper function
                     if (TestPossibleValuesContainAttributeValues -PossibleValues $attribute.PossibleValues -AttributeValues $AttributeValue )
                     {
-                        try
-                        {
-                            $params = @{
-                                'AttributeName'  = $AttributeName
-                                'AttributeValue' = $AttributeValue
-                            }
-
-                            $responseData = Invoke-CimMethod -InputObject $instance -MethodName SetAttribute -CimSession $iDRACSession -Arguments $params
-                            if ($responseData.ReturnValue -eq 0)
-                            {
-                                Write-Verbose -Message 'LC attribute configured successfully'
-                                if ($responseData.RebootRequired -eq 'Yes')
-                                {
-                                    Write-Verbose -Message 'LC attribute change requires reboot.'
+                        if ($PSCmdlet.ShouldProcess($AttributeValue, 'Set LC attribute')) {
+                            try {
+                                $params = @{
+                                    'AttributeName'  = $AttributeName
+                                    'AttributeValue' = $AttributeValue
                                 }
-                            }
-                            else
-                            {
-                                Write-Warning -Message "LC attribute change failed: $($responseData.Message)"
+
+                                $responseData = Invoke-CimMethod -InputObject $instance -MethodName SetAttribute -CimSession $iDRACsession -Arguments $params
+                                if ($responseData.ReturnValue -eq 0) {
+                                    Write-Verbose -Message 'LC attribute configured successfully'
+                                    if ($responseData.RebootRequired -eq 'Yes') {
+                                        Write-Verbose -Message 'LC attribute change requires reboot.'
+                                        return [PSCustomObject]@{Result = $true ; RebootRequired  = $true}
+                                    }
+                                    return [PSCustomObject]@{Result = $true ; RebootRequired  = $false}
+                                } else {
+                                    Write-Warning -Message "LC attribute change failed: $($responseData.Message)"
+                                    return [PSCustomObject]@{Result = $false ; RebootRequired  = $false}
+                                }
+                            } catch {
+                                Write-Error -Message $_
                             }
                         }
-                        catch
-                        {
-                            Write-Error -Message $_
-                        }
-                    }
-                    else
-                    {
+                    } else {
                         Write-Error -Message "Attribute value `"${AttributeValue}`" is not valid for attribute ${AttributeName}."
                     }
                 }

@@ -88,7 +88,7 @@ function Import-PECertificate
 
         $params=@{}
 
-        if ( !$webServerCertificate -and !$ADServiceCertificate -and !$customSigningCertificate ) 
+        if ( !$webServerCertificate -and !$ADServiceCertificate -and !$customSigningCertificate )
         {
             Throw "ERROR: Missing certificate type"
         }
@@ -104,7 +104,7 @@ function Import-PECertificate
             $data = Get-Content -Path $certificateFileName -Encoding String -Raw
             $certificate = [System.Convert]::ToBase64String( [System.Text.Encoding]::UTF8.GetBytes($data))
 
-            if ( $certificate.Length -eq 0 ) 
+            if ( $certificate.Length -eq 0 )
             {
                 Throw "ERROR: No certificate found in file specified"
             }
@@ -112,27 +112,27 @@ function Import-PECertificate
 
         $params=@{}
 
-        if ($certificate) 
+        if ($certificate)
         {
             $params.SSLCertificateFile = $certificate
         }
 
-        if ($passphrase) 
+        if ($passphrase)
         {
             # First create the credential out of the secure string and then fetch the clear text value of passphrase
             $tempCred = New-Object -Typename PSCredential -ArgumentList 'temp',$passphrase
-            $params.Passphrase = $tempCred.GetNetworkCredntial().Password
+            $params.Passphrase = $tempCred.GetNetworkCredential().Password
         }
 
-        if ($webServerCertificate) 
+        if ($webServerCertificate)
         {
             $params.CertificateType = "1"
         }
-        elseif ($ADServiceCertificate) 
+        elseif ($ADServiceCertificate)
         {
             $params.CertificateType = "2"
-        } 
-        else 
+        }
+        else
         {
             $params.CertificateType = "3"
         }
@@ -142,19 +142,19 @@ function Import-PECertificate
 
         Write-Verbose "Importing Certificate to $($iDRACsession.ComputerName)"
         $responseData = Invoke-CimMethod -InputObject $instance -MethodName ImportSSLCertificate -CimSession $iDRACsession -Arguments $params #2>&1
-        if ($responseData.ReturnValue -eq 4096) 
+        if ($responseData.ReturnValue -eq 4096)
         {
-            if ($Passthru) 
+            if ($Passthru)
             {
                 $responseData
-            } 
-            elseif ($Wait) 
+            }
+            elseif ($Wait)
             {
                 Wait-PEConfigurationJob -iDRACSession $iDRACsession -JobID $responseData.Job.EndpointReference.InstanceID -Activity "Configuring Standard Schema Settings for $($iDRACsession.ComputerName)"
                 Write-Verbose "Imported Certificate to $($iDRACsession.ComputerName) successfully"
             }
-        } 
-        else 
+        }
+        else
         {
             Throw "Certificate Import to $($iDRACsession.ComputerName) failed with error: $($responseData.Message)"
         }

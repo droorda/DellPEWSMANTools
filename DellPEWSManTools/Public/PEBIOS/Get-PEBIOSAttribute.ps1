@@ -2,6 +2,7 @@
 Get-PEBIOSAttribute.ps1 - Gets a list of BIOS attributes
 
 _author_ = Ravikanth Chaganti <Ravikanth_Chaganti@Dell.com> _version_ = 1.0
+_Updated_= Doug Roorda <droorda at gmail.com> = 1.1
 
 Copyright (c) 2017, Dell, Inc.
 
@@ -10,7 +11,7 @@ This software is licensed to you under the GNU General Public License, version 2
 
 function Get-PEBIOSAttribute
 {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='None')]
     [OutputType([Microsoft.Management.Infrastructure.CimInstance])]
     Param
     (
@@ -19,10 +20,10 @@ function Get-PEBIOSAttribute
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
-        [Parameter()]
+        [Parameter(ParameterSetName='AttributeDisplayName')]
         [String] $AttributeDisplayName,
 
-        [Parameter()]
+        [Parameter(ParameterSetName='AttributeName')]
         [String] $AttributeName,
 
         [Parameter()]
@@ -37,44 +38,40 @@ function Get-PEBIOSAttribute
     Process
     {
         Write-Verbose "Retrieving PEBIOS attribute information ..."
-        try
-        {
-            if ($AttributeDisplayName -and $AttributeName)
-            {
-                Write-Warning -Message 'Both AttributeName and AttributeDisplayName are specified. Only either of them will be used in the filter.'
-            }
-
-            if ($AttributeName -and $GroupDisplayName)
-            {
-                $filter = "AttributeName='$AttributeName' AND GroupDisplayName='$GroupDisplayName'"
-            }
-            elseif ($AttributeName)
-            {
-                $filter = "AttributeName='$AttributeName'"
-            }
-            elseif ($AttributeDisplayName -and $GroupDisplayName)
-            {
-
-                $filter = "AttributeDisplayName='$AttributeDisplayName' AND GroupDisplayName='$GroupDisplayName'"
-            }
-            elseif ($GroupDisplayName)
-            {
-                $filter = "GroupDisplayName='$GroupDisplayName'"
-            }
-            elseif ($AttributeDisplayName)
-            {
-                $filter = "AttributeDisplayName='$AttributeDisplayName'"
-            }
-            else
-            {
-                $filter = $null
-            }
-
-            Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_BIOSEnumeration -Namespace root\dcim -Filter $filter -ErrorAction Stop
+        $filter = $null
+        if ($GroupDisplayName) {
+                $filter =             "GroupDisplayName='$GroupDisplayName'"
         }
-        catch
-        {
-            Write-Error -Message $_
+        if ($AttributeName) {
+            if ($filter){
+                $filter = "$filter AND AttributeName='$AttributeName'"
+            } else {
+                $filter =             "AttributeName='$AttributeName'"
+            }
+        }
+        if ($AttributeDisplayName) {
+            if ($filter){
+                $filter = "$filter AND AttributeDisplayName='$AttributeDisplayName'"
+            } else {
+                $filter =             "AttributeDisplayName='$AttributeDisplayName'"
+            }
+        }
+        if ($filter) {
+            Write-Verbose "Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_BIOSEnumeration -Namespace root\dcim -Filter ""$filter"" -ErrorAction Stop"
+            try {
+                Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_BIOSEnumeration -Namespace root\dcim -Filter "$filter" -ErrorAction Stop
+            } catch {
+                try {
+                    sleep -s 5
+                    Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_BIOSEnumeration -Namespace root\dcim -Filter "$filter" -ErrorAction Stop
+                } catch {
+                    Write-warning "Get-PEBIOSAttribute Failed : $($_.Exception.Message)"
+                }
+            }
+
+        } else {
+            Write-Verbose "Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_BIOSEnumeration -Namespace root\dcim -ErrorAction Stop"
+            Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_BIOSEnumeration -Namespace root\dcim -ErrorAction Stop
         }
     }
 
