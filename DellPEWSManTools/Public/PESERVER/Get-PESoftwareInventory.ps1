@@ -32,17 +32,20 @@ function  Get-PESoftwareInventory
         if ($Available)
         {
             Write-Verbose "Getting available Software Inventory for $($iDRACSession.ComputerName) ..."
-            Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_SoftwareIdentity -Filter "Status='Available'" -Namespace "root/dcim"
+            Get-CimInstance -CimSession $iDRACSession -ResourceUri "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/DCIM_SoftwareIdentity" -Namespace "root/dcim" | Where-Object {$_.Status -eq 'Available'}
+            # Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_SoftwareIdentity -Filter "Status='Available'" -Namespace "root/dcim"
         }
         elseif ($Installed)
         {
             Write-Verbose "Getting installed software inventory for $($iDRACSession.ComputerName) ..."
-            Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_SoftwareIdentity -Filter "Status='Installed'" -Namespace "root/dcim"
+            Get-CimInstance -CimSession $iDRACSession -ResourceUri "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/DCIM_SoftwareIdentity" -Namespace "root/dcim" | Where-Object {$_.Status -eq 'Installed'}
+            # Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_SoftwareIdentity -Filter "Status='Installed'" -Namespace "root/dcim"
         }
         else
         {
             Write-Verbose "Getting software inventory for $($iDRACSession.ComputerName) ..."
-            Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_SoftwareIdentity -Namespace "root/dcim"
+            Get-CimInstance -CimSession $iDRACSession -ResourceUri "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/DCIM_SoftwareIdentity" -Namespace "root/dcim"
+            # Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_SoftwareIdentity -Namespace "root/dcim"
         }
     }
 }
