@@ -62,7 +62,7 @@ function Get-PEBIOSAttribute
                 Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_BIOSEnumeration -Namespace root\dcim -Filter "$filter" -ErrorAction Stop
             } catch {
                 try {
-                    sleep -s 5
+                    Start-Sleep -s 5
                     Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_BIOSEnumeration -Namespace root\dcim -Filter "$filter" -ErrorAction Stop
                 } catch {
                     Write-warning "Get-PEBIOSAttribute Failed : $($_.Exception.Message)"

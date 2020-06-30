@@ -78,7 +78,7 @@ function Get-PEDRACAttribute
 
             } catch {
                 try {
-                    sleep -s 5
+                    Start-Sleep -s 5
                     write-verbose "Retry 1"
                     Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_iDRACCardAttribute -Namespace root\dcim -Filter $filter -ErrorAction Stop
 #                } catch [Microsoft.Management.Infrastructure.CimException] {
@@ -115,12 +115,12 @@ function Get-PEDRACAttribute
                 } catch {
                     Try{
                         write-verbose "Retry 1"
-                        sleep -s 5
+                        Start-Sleep -s 5
                         $return  += Get-CimInstance -CimSession $iDRACSession -ClassName $ClassName -Namespace root\dcim -ErrorAction Stop
                     } catch {
                         Try{
                             write-verbose "Retry 2"
-                            sleep -s 30
+                            Start-Sleep -s 30
                             $return  += Get-CimInstance -CimSession $iDRACSession -ClassName $ClassName -Namespace root\dcim -ErrorAction Stop
                         } catch {
                                 Write-warning "Get-PEDRACAttribute:$ClassName Failed : $($_.Exception.Message)"
@@ -128,7 +128,7 @@ function Get-PEDRACAttribute
                     }
                 }
             }
-            $return | sort InstanceID
+            $return | Sort-Object InstanceID
         }
     }
 

@@ -76,11 +76,11 @@ function New-PEDRACSession
                 $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $MaxTimeout -ErrorAction Stop
             } catch {
                 try {
-                    sleep -s 10
+                    Start-Sleep -s 10
                     $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $MaxTimeout -ErrorAction Stop
                 } catch {
                     try {
-                        sleep -s 60
+                        Start-Sleep -s 60
                         $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $MaxTimeout -ErrorAction Stop
                     } catch {
                         Throw "New-PEDRACSession Failed : $($_.Exception.Message)"

@@ -89,7 +89,7 @@ Function New-PEBIOSConfigurationJob
             } else {
                 Write-warning -Message "New-PEBIOSConfigurationJob: $($Job.ReturnValue)\$($Job.MessageID)\$($Job.Message)"
                 if ($Job.MessageID -eq 'BIOS009'){
-                    sleep -s 120
+                    Start-Sleep -s 120
                     $Job = Invoke-CimMethod -InputObject $instance -MethodName CreateTargetedConfigJob -CimSession $idracsession -Arguments $Parameters
                     if ($Job.ReturnValue -eq 4096) {
                         if ($PSCmdlet.ParameterSetName -eq 'Passthru') {
