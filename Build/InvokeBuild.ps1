@@ -92,7 +92,7 @@ task Build Test, {
     {
         [Version]$Version = Get-NextNugetPackageVersion -Name $env:BHProjectName -PackageSourceUrl 'https://NuGET.dev.iconic-it.com/Nuget' -ErrorAction Stop
         [Version]$LocalVersion  = Get-Metadata -Path $env:BHPSModuleManifest -PropertyName ModuleVersion
-        if ($Version -eq "0.0.1") {
+        if (($Version -eq "0.0.1") -or ($LocalVersion -gt $Version)) {
             $Version = $LocalVersion
         }
         # $Build    = if($Version.Build    -le 0) { 0 } else { $Version.Build }
