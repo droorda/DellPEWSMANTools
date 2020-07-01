@@ -23,7 +23,7 @@ Function Get-PERAIDEnumeration
             Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_RAIDEnumeration -Namespace 'root/dcim' -ErrorAction Stop
         } catch {
             try {
-                sleep -s 5
+                Start-Sleep -Seconds 5
                 Get-CimInstance -CimSession $iDRACSession -ClassName DCIM_RAIDEnumeration -Namespace 'root/dcim' -ErrorAction Stop
             } catch {
                 Write-warning "Get-PERAIDEnumeration Failed : $($_.Exception.Message)"
