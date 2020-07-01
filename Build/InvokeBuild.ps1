@@ -92,12 +92,12 @@ task Build Test, {
     {
         [Version]$Version = Get-NextNugetPackageVersion -Name $env:BHProjectName -PackageSourceUrl 'https://NuGET.dev.iconic-it.com/Nuget' -ErrorAction Stop
         [Version]$LocalVersion  = Get-Metadata -Path $env:BHPSModuleManifest -PropertyName ModuleVersion
-        if (($Version -eq "0.0.1") -or ($LocalVersion -gt $Version)) {
+        if ($LocalVersion -ge $Version) {
             $Version = $LocalVersion
         }
-        # $Build    = if($Version.Build    -le 0) { 0 } else { $Version.Build }
+        $Build    = if($Version.Build    -le 0) { 0 } else { $Version.Build }
         $Revision = if($Version.Revision -le 0) { 1 } else { $LocalVersion.Revision + 1 }
-        $Version  = "$(New-Object System.Version ($Version.Major, $Version.Minor, $Build, $Revision))-beta"
+        $Version  = New-Object System.Version ($Version.Major, $Version.Minor, $Build, $Revision)
         # write-Verbose "BHProjectName      - $env:BHProjectName" -Verbose
         write-Verbose "Version            - $Version" -Verbose
         # write-Verbose "BHPSModuleManifest - $env:BHPSModuleManifest" -Verbose
@@ -117,6 +117,12 @@ task Deploy Build, {
         Path = $ProjectRoot
         Force = $true
         Recurse = $false # We keep psdeploy artifacts, avoid deploying those : )
+        Beta = $true
+        FeedUrl = $Credentials.NuGet.FeedUrl
+        ApiKey = $Credentials.NuGet.ApiKey
+
     }
+    . C:\Projects\GitHub\PSPostMan\PSPostMan.ps1
     Invoke-PSDeploy @Verbose @Params
 }
+
