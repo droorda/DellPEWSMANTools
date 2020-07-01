@@ -9,7 +9,7 @@ This software is licensed to you under the GNU General Public License, version 2
 #>
 function Import-PECertificate
 {
-    [CmdletBinding(DefaultParameterSetName='General',  
+    [CmdletBinding(DefaultParameterSetName='General',
                   PositionalBinding=$false)]
     [OutputType([String])]
     Param
@@ -25,14 +25,14 @@ function Import-PECertificate
                    Position=0,
                    ParameterSetName='Passthru')]
         [ValidateNotNullOrEmpty()]
-        [Alias("s")] 
+        [Alias("s")]
         $iDRACSession,
 
         # Pass phrase
         [Parameter(ParameterSetName='General')]
         [Parameter(ParameterSetName='Wait')]
         [Parameter(ParameterSetName='Passthru')]
-        [Alias("pass")] 
+        [Alias("pass")]
         [SecureString]
         $passphrase,
 
@@ -42,7 +42,7 @@ function Import-PECertificate
         [Parameter(Mandatory,ParameterSetName='Passthru')]
         [ValidateNotNull()]
         [ValidateNotNullOrEmpty()]
-        [Alias("cert")] 
+        [Alias("cert")]
         [string]
         $certificateFileName,
 
@@ -50,7 +50,7 @@ function Import-PECertificate
         [Parameter(ParameterSetName='General')]
         [Parameter(ParameterSetName='Wait')]
         [Parameter(ParameterSetName='Passthru')]
-        [Alias("wsc")] 
+        [Alias("wsc")]
         [switch]
         $webServerCertificate,
 
@@ -58,7 +58,7 @@ function Import-PECertificate
         [Parameter(ParameterSetName='General')]
         [Parameter(ParameterSetName='Wait')]
         [Parameter(ParameterSetName='Passthru')]
-        [Alias("asc")] 
+        [Alias("asc")]
         [switch]
         $ADServiceCertificate,
 
@@ -66,7 +66,7 @@ function Import-PECertificate
         [Parameter(ParameterSetName='General')]
         [Parameter(ParameterSetName='Wait')]
         [Parameter(ParameterSetName='Passthru')]
-        [Alias("csc")] 
+        [Alias("csc")]
         [switch]
         $customSigningCertificate,
 
@@ -93,13 +93,13 @@ function Import-PECertificate
             Throw "ERROR: Missing certificate type"
         }
 
-        if ( ($webServerCertificate -and $ADServiceCertificate) -or ($ADServiceCertificate -and $customSigningCertificate) -or ($webServerCertificate -and $customSigningCertificate) ) 
+        if ( ($webServerCertificate -and $ADServiceCertificate) -or ($ADServiceCertificate -and $customSigningCertificate) -or ($webServerCertificate -and $customSigningCertificate) )
         {
             Throw "ERROR: Cannot process multiple certificate types"
         }
 
-    
-        if ( $certificateFileName ) 
+
+        if ( $certificateFileName )
         {
             $data = Get-Content -Path $certificateFileName -Encoding String -Raw
             $certificate = [System.Convert]::ToBase64String( [System.Text.Encoding]::UTF8.GetBytes($data))
