@@ -11,7 +11,7 @@ This software is licensed to you under the GNU General Public License, version 2
 
 function Set-PESkipISOImageBoot
 {
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='Low')]
     param (
         [Parameter(Mandatory)]
         [Alias("s")]

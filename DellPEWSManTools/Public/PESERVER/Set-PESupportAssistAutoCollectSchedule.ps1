@@ -9,7 +9,6 @@ This software is licensed to you under the GNU General Public License, version 2
 #>
 function Set-PESupportAssistAutoCollectSchedule
 {
-  [CmdletBinding(DefaultParameterSetName='General')]
   Param
   (
       [Parameter(Mandatory,
@@ -19,6 +18,7 @@ function Set-PESupportAssistAutoCollectSchedule
       [Alias("s")]
       [ValidateNotNullOrEmpty()]
       $iDRACSession,
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact='Low', DefaultParameterSetName='General')]
 
       [Parameter(Mandatory,
                  ParameterSetName='Monthly')]
