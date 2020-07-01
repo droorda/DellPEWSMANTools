@@ -79,8 +79,8 @@ Function New-PEConfigurationJob
         write-Verbose "New-PEConfigurationJob -iDRACSession $iDRACSession -CimClass $CimClass -InstanceID $InstanceID"
         $properties=@{}
         (Get-CimInstance -CimSession $iDRACSession -ClassName $CimClass -Namespace $Namespace).PSObject.Properties |
-                where {@('SystemCreationClassName','SystemName','CreationClassName','Name') -contains $_.name} |
-                foreach {
+                Where-Object {@('SystemCreationClassName','SystemName','CreationClassName','Name') -contains $_.name} |
+                Foreach-Object {
                     Write-Verbose "CIM Property `"$($_.name)`" = $($_.value)"
                     $properties[$_.name] = $_.value
                 }
