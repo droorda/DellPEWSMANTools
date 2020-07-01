@@ -83,7 +83,14 @@ function New-PEDRACSession
                         Start-Sleep -s 60
                         $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $MaxTimeout -ErrorAction Stop
                     } catch {
-                        Throw "New-PEDRACSession Failed : $($_.Exception.Message)"
+                        $PSCmdlet.WriteError([System.Management.Automation.ErrorRecord]::new(
+                            ([Exception]::new("New-PEDRACSession Failed : $($_.Exception.Message)")),
+                            "1",
+                            [System.Management.Automation.ErrorCategory]::NotSpecified,
+                            $null # $TargetObject # usually the object that triggered the error, if possible
+                        ))
+                        return
+
                     }
                 }
             }
