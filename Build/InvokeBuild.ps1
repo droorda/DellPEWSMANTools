@@ -95,7 +95,7 @@ task Build Test, {
         if ($LocalVersion -ge $Version) {
             $Version = $LocalVersion
         }
-        $Build    = if($Version.Build    -le 0) { 0 } else { $Version.Build }
+        $Build    = if($Version.Build    -le 0) { 0 } else { $Version.Build + 1 }
         $Revision = if($Version.Revision -le 0) { 1 } else { $LocalVersion.Revision + 1 }
         $Version  = New-Object System.Version ($Version.Major, $Version.Minor, $Build, $Revision)
         # write-Verbose "BHProjectName      - $env:BHProjectName" -Verbose
