@@ -19,7 +19,6 @@ function Get-PEDRACAttribute
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
-        [Parameter()]
         [String] $GroupID,
 
         [String] $AttributeDisplayName,
@@ -102,11 +101,16 @@ function Get-PEDRACAttribute
 #                        }
 #                    }
                 } catch {
-                    Write-warning "Get-PEDRACAttribute Failed : $($_.Exception.Message)"
+                    $PSCmdlet.WriteError([System.Management.Automation.ErrorRecord]::new(
+                        ([Exception]::new("Get-PEDRACAttribute Failed : $($_.Exception.Message)")),
+                        "1",
+                        [System.Management.Automation.ErrorCategory]::NotSpecified,
+                        $null # $TargetObject # usually the object that triggered the error, if possible
+                    ))
+                    return
                 }
             }
         } else {
-            #Break query to parts if scan Times out
             $return = @()
             Foreach ($ClassName in @('DCIM_iDRACCardEnumeration','DCIM_iDRACCardInteger','DCIM_iDRACCardString')){
                 Try{
@@ -123,7 +127,13 @@ function Get-PEDRACAttribute
                             Start-Sleep -s 30
                             $return  += Get-CimInstance -CimSession $iDRACSession -ClassName $ClassName -Namespace root\dcim -ErrorAction Stop
                         } catch {
-                                Write-warning "Get-PEDRACAttribute:$ClassName Failed : $($_.Exception.Message)"
+                            $PSCmdlet.WriteError([System.Management.Automation.ErrorRecord]::new(
+                                ([Exception]::new("Get-PEDRACAttribute:$ClassName Failed : $($_.Exception.Message)")),
+                                "2",
+                                [System.Management.Automation.ErrorCategory]::NotSpecified,
+                                $null # $TargetObject # usually the object that triggered the error, if possible
+                            ))
+                            return
                         }
                     }
                 }
