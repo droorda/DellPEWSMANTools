@@ -14,7 +14,7 @@ if(-not $ENV:BHProjectPath)
 }
 
 
-$PSVersion = $PSVersionTable.PSVersion.Major
+# $PSVersion = $PSVersionTable.PSVersion.Major
 Remove-Module $ENV:BHProjectName -ErrorAction SilentlyContinue
 Import-Module (Join-Path $ENV:BHProjectPath $ENV:BHProjectName) -Force
 
@@ -32,8 +32,8 @@ $module = $manifest.BaseName
 
 Import-Module "$ENV:BHPSModuleManifest" -Force
 
-$AllFunctions = & $moduleData {Param($modulename) Get-command -CommandType Function -Module $modulename} $module
 $ModuleData = Get-Module $Module
+# $AllFunctions = & $moduleData {Param($modulename) Get-command -CommandType Function -Module $modulename} $module
 
 if ($PrivateFunctions.count -gt 0)
 {

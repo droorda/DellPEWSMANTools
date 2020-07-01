@@ -39,7 +39,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
             }
 
             It "Should try creating the CIMSession" {
-                Assert-MockCalled -CommandName New-CimSession -Times 1 -Exactly -Scope Context
+                Assert-MockCalled -CommandName New-CimSession -Times 3 -Exactly -Scope Context
                 $PEDRACSession | Should BeNullOrEmpty
             }
 

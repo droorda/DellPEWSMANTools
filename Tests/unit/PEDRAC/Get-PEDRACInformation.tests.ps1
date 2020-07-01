@@ -37,7 +37,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
             # Assert
             It "Should query the correct classname in correct namespace" {
                 Assert-MockCalled -CommandName Get-CimInstance -Times 1 -Exactly -Scope Context
-                Assert-VerifiableMocks # assert that our mock was called
+                Assert-VerifiableMock # assert that our mock was called
             }
 
             It "Should return the mocked output" {
@@ -64,7 +64,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
             }
 
             It "Should query the correct class and namespace" {
-                Assert-VerifiableMocks
+                Assert-VerifiableMock
             }
         }
 

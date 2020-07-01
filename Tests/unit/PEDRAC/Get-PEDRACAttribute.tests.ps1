@@ -27,11 +27,10 @@ InModuleScope -ModuleName $ENV:BHProjectName {
             } -ParameterFilter {
                 # param filters her
                 #($filter -eq $null) -and # this fails
-                [String]::IsNullOrEmpty($Filter) -and 
+                [String]::IsNullOrEmpty($Filter) -and
                 ($cimsession -ne $null) -and
-                ($ClassName-eq 'DCIM_iDRACCardAttribute') -and
+                (@('DCIM_iDRACCardEnumeration','DCIM_iDRACCardInteger','DCIM_iDRACCardString') -contains $ClassName ) -and
                 ($NameSpace -eq 'root\dcim')
-                
             } -Verifiable
 
             # Act
@@ -39,13 +38,13 @@ InModuleScope -ModuleName $ENV:BHProjectName {
 
             # Assert
             It "Should query the correct class and namespace without any filter" {
-                Assert-MockCalled -CommandName Get-CimInstance -Times 1 -Exactly -Scope Context
-                Assert-VerifiableMocks
+                Assert-MockCalled -CommandName Get-CimInstance -Times 3 -Exactly -Scope Context
+                Assert-VerifiableMock
             }
 
             It "Should return the mocked object" {
                 $Output | Should NOT BeNullOrEmpty
-                $Output.iDRAC | Should Be $True
+                $Output.iDRAC | Should Be @($true, $true, $true) # module does not dedupe the MOCK input
             }
         }
 
@@ -61,7 +60,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
                 ($Filter.Contains('AttributeDisplayName')) -and
                 ($Filter.Contains('GroupDisplayName')) -and
                 ($cimsession -ne $null) -and
-                ($ClassName-eq 'DCIM_iDRACCardAttribute') -and
+                ($ClassName -eq 'DCIM_iDRACCardAttribute') -and
                 ($NameSpace -eq 'root\dcim')
 
             } -Verifiable
@@ -72,7 +71,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
             # Assert
             It "Should query the correct class and namespace filter for AttributeDisplayName and GroupDisplayName" {
                 Assert-MockCalled -CommandName Get-CimInstance -Times 1 -Exactly -Scope Context
-                Assert-VerifiableMocks
+                Assert-VerifiableMock
             }
 
             It "Should return the mocked object" {
@@ -93,7 +92,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
                 ($Filter.Contains('AttributeDisplayName')) -and
                 (-not $Filter.Contains('GroupDisplayName')) -and
                 ($cimsession -ne $null) -and
-                ($ClassName-eq 'DCIM_iDRACCardAttribute') -and
+                ($ClassName -eq 'DCIM_iDRACCardAttribute') -and
                 ($NameSpace -eq 'root\dcim')
 
             } -Verifiable
@@ -104,7 +103,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
             # Assert
             It "Should query the correct class and namespace with filter for AttributeDisplayName" {
                 Assert-MockCalled -CommandName Get-CimInstance -Times 1 -Exactly -Scope Context
-                Assert-VerifiableMocks
+                Assert-VerifiableMock
             }
 
             It "Should return the mocked object" {
@@ -125,7 +124,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
                 (-not $Filter.Contains('AttributeDisplayName')) -and
                 ($Filter.Contains('GroupDisplayName')) -and
                 ($cimsession -ne $null) -and
-                ($ClassName-eq 'DCIM_iDRACCardAttribute') -and
+                ($ClassName -eq 'DCIM_iDRACCardAttribute') -and
                 ($NameSpace -eq 'root\dcim')
 
             } -Verifiable
@@ -136,7 +135,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
             # Assert
             It "Should query the correct class and namespace with filter for GroupDisplayName" {
                 Assert-MockCalled -CommandName Get-CimInstance -Times 1 -Exactly -Scope Context
-                Assert-VerifiableMocks
+                Assert-VerifiableMock
             }
 
             It "Should return the mocked object" {
@@ -148,20 +147,20 @@ InModuleScope -ModuleName $ENV:BHProjectName {
         Context 'Querying the class failed' {
             Mock -CommandName Get-CimInstance -MockWith { throw 'failure'} -ParameterFilter {
                 ($cimsession -ne $null) -and
-                ($ClassName -eq 'DCIM_iDRACCardAttribute') -and
+                (@('DCIM_iDRACCardEnumeration','DCIM_iDRACCardInteger','DCIM_iDRACCardString') -contains $ClassName ) -and
                 ($NameSpace -eq 'root\dcim')
             } -Verifiable
 
             $Output = Get-PEDRACAttribute -iDRACSession 'dummy' -ErrorAction SilentlyContinue -ErrorVariable PEDRACAttribError
 
             It "Should write the error to the error stream" {
-                {Get-PEDRACAttribute -iDRACSession 'dummy' -ErrorAction Stop} | Should Throw 'failure'
+                {Get-PEDRACAttribute -iDRACSession 'dummy' -ErrorAction Stop} | Should Throw 'Get-PEDRACAttribute:DCIM_iDRACCardEnumeration Failed : failure'
                 $PEDRACAttribError | Should NOT BeNullOrEmpty
                 $Output | Should BeNullOrEmpty
             }
 
             It "Should query the correct class and namespace" {
-                Assert-VerifiableMocks
+                Assert-VerifiableMock
             }
         }
     }
