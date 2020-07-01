@@ -117,7 +117,7 @@ task Deploy Build, {
         Path = $ProjectRoot
         Force = $true
         Recurse = $false # We keep psdeploy artifacts, avoid deploying those : )
-        Beta = $true
+        Beta = $false
         FeedUrl = $Credentials.NuGet.FeedUrl
         ApiKey = $Credentials.NuGet.ApiKey
 
