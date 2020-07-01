@@ -13,7 +13,7 @@ if(-not $ENV:BHProjectPath)
     Set-BuildEnvironment -Path $PSScriptRoot\..\..\..
 }
 
-Import-Module (Join-Path $ENV:BHProjectPath $ENV:BHProjectName) 
+Import-Module (Join-Path $ENV:BHProjectPath $ENV:BHProjectName)
 
 InModuleScope -ModuleName $ENV:BHProjectName {
 
@@ -24,7 +24,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
     Describe 'New-PEDRACSession' -Tag UnitTest {
 
         Context "Opening a CIM Session to PE Server failed" {
-            
+
             # Arrange
             Mock -CommandName New-CimSessionOption -MockWith {} -Verifiable
             Mock -CommandName New-CimSession -MockWith {throw "failure"} -Verifiable
@@ -32,7 +32,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
 
             # Act
             $PEDRACSession = New-PEDRACSession @PEDRACSessionParamHash -ErrorAction SilentlyContinue
-            
+
             # Assert
             It "Should create custom CIMSession options"{
                 Assert-MockCalled -CommandName New-CimSessionOption -Times 1 -Exactly -Scope Context

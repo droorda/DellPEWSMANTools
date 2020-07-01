@@ -22,13 +22,13 @@ function New-PESystemJob
         [ValidateSet(0,1,2,3)]
         [String]
         $JobType
-    
+
     )
 
-    Process 
+    Process
     {
         if ($PSCmdlet.ShouldProcess($($iDRACSession.ComputerName),'create new system job'))
-        {              
+        {
             $properties= @{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_JobService";Name="DCIM:JobService";}
             $instance = New-CimInstance -ClassName DCIM_JobService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
 

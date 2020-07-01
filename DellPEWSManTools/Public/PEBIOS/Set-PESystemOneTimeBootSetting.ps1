@@ -41,7 +41,7 @@ function Set-PESystemOneTimeBootSetting
                     'AttributeName'=@('OneTimeBootMode','OneTimeUefiBootSeqDev')
                     'AttributeValue'=@('OneTimeUefiBootSeq',$OneTimeBootDevice)
                 }
-                
+
                 $responseData = Invoke-CimMethod -InputObject $instance -MethodName SetAttributes -CimSession $iDRACsession -Arguments $params
                 if ($responseData.ReturnValue -eq 0)
                 {
@@ -56,7 +56,7 @@ function Set-PESystemOneTimeBootSetting
                     Write-Warning -Message "One time boot mode change failed: $($responseData.Message)"
                 }
             }
-            
+
         }
         else
         {

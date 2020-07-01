@@ -18,7 +18,7 @@ This software is licensed to you under the GNU General Public License, version 2
                     MockWith = {throw 'failure'}
                     ParameterFilter = {
                         ($CIMSession -ne $Null) -and
-                        ($NameSpace -eq 'root\dcim') 
+                        ($NameSpace -eq 'root\dcim')
                     }
                 };
                 @{
@@ -35,7 +35,7 @@ This software is licensed to you under the GNU General Public License, version 2
                     MockWith = {throw 'failure'}
                     ParameterFilter = {
                         ($CIMSession -ne $Null) -and
-                        ($NameSpace -eq 'root\dcim') 
+                        ($NameSpace -eq 'root\dcim')
                     }
                 };
                 @{

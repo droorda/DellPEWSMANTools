@@ -9,7 +9,7 @@ This software is licensed to you under the GNU General Public License, version 2
 #>
 function Get-PEDRACUser
 {
-    [CmdletBinding(DefaultParameterSetName='General', 
+    [CmdletBinding(DefaultParameterSetName='General',
                   PositionalBinding=$false)]
     [OutputType([System.Collections.HashTable])]
     Param

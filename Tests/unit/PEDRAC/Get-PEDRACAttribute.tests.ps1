@@ -13,7 +13,7 @@ if(-not $ENV:BHProjectPath)
     Set-BuildEnvironment -Path $PSScriptRoot\..\..\..
 }
 
-Import-Module (Join-Path $ENV:BHProjectPath $ENV:BHProjectName) 
+Import-Module (Join-Path $ENV:BHProjectPath $ENV:BHProjectName)
 
 InModuleScope -ModuleName $ENV:BHProjectName {
     Describe 'Get-PEDRACAttribute' {
@@ -63,7 +63,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
                 ($cimsession -ne $null) -and
                 ($ClassName-eq 'DCIM_iDRACCardAttribute') -and
                 ($NameSpace -eq 'root\dcim')
-                
+
             } -Verifiable
 
             # Act
@@ -95,7 +95,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
                 ($cimsession -ne $null) -and
                 ($ClassName-eq 'DCIM_iDRACCardAttribute') -and
                 ($NameSpace -eq 'root\dcim')
-                
+
             } -Verifiable
 
             # Act
@@ -127,7 +127,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
                 ($cimsession -ne $null) -and
                 ($ClassName-eq 'DCIM_iDRACCardAttribute') -and
                 ($NameSpace -eq 'root\dcim')
-                
+
             } -Verifiable
 
             # Act

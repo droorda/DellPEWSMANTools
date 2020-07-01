@@ -1,6 +1,6 @@
 function Export-PEHardwareInventory {
     [CmdletBinding()]
-    param 
+    param
     (
         [Parameter(Mandatory,
             ParameterSetName = 'General')]
@@ -98,11 +98,11 @@ function Export-PEHardwareInventory {
 
         if ($PSCmdlet.ParameterSetName -ne 'Local')
         {
-            if ($ShareObject) 
+            if ($ShareObject)
             {
                 $parameters = $ShareObject.Clone()
-            } 
-            else 
+            }
+            else
             {
                 $parameters = @{
                     IPAddress = $IPAddress
@@ -111,24 +111,24 @@ function Export-PEHardwareInventory {
                     XMLSchema = ([XMLSchema]$XMLSchema -as [int])
                 }
 
-                if ($Credential) 
+                if ($Credential)
                 {
                     $Parameters.Add('Username',$Credential.GetNetworkCredential().UserName)
                     $Parameters.Add('Password',$Credential.GetNetworkCredential().Password)
-                    if ($Credential.GetNetworkCredential().Domain) 
+                    if ($Credential.GetNetworkCredential().Domain)
                     {
                         $Parameters.Add('Workgroup',$Credential.GetNetworkCredential().Domain)
                     }
                 }
             }
 
-            if (-not $FileName) 
+            if (-not $FileName)
             {
                 $FileName = "$($iDRACSession.Computername)-inventory.xml"
             }
-            
+
             Write-Verbose "Hardware inventoy profile will be backed up as ${FileName}"
-            $Parameters.Add('Filename',$FileName)            
+            $Parameters.Add('Filename',$FileName)
         }
         else
         {
@@ -139,10 +139,10 @@ function Export-PEHardwareInventory {
         }
     }
 
-    Process 
+    Process
     {
         $job = Invoke-CimMethod -InputObject $instance -MethodName ExportHWInventory -CimSession $iDRACSession -Arguments $Parameters
-        if ($job.ReturnValue -eq 4096) 
+        if ($job.ReturnValue -eq 4096)
         {
             if ($PSCmdlet.ParameterSetName -eq 'Local')
             {
@@ -157,18 +157,18 @@ function Export-PEHardwareInventory {
                 }
                 else
                 {
-                    return $jobData    
+                    return $jobData
                 }
             }
             else
             {
-                if ($Wait) 
+                if ($Wait)
                 {
                     Wait-PEConfigurationJob -iDRACSession $iDRACSession -JobID $job.Job.EndpointReference.InstanceID -Activity "Exporting hardware inventory for $($iDRACSession.ComputerName)"
-                }    
+                }
             }
-        } 
-        else 
+        }
+        else
         {
             Throw "Job Creation failed with error: $($Job.Message)"
         }

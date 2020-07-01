@@ -13,7 +13,7 @@ if(-not $ENV:BHProjectPath)
     Set-BuildEnvironment -Path $PSScriptRoot\..\..\..
 }
 
-Import-Module (Join-Path $ENV:BHProjectPath $ENV:BHProjectName) 
+Import-Module (Join-Path $ENV:BHProjectPath $ENV:BHProjectName)
 
 InModuleScope -ModuleName $ENV:BHProjectName {
 
@@ -27,13 +27,13 @@ InModuleScope -ModuleName $ENV:BHProjectName {
                 }
             } -ParameterFilter {
                 # param filters her
-                ($Filter -eq 'InstanceID like "%ADGroup.%"') -and 
-                ($Property -Contains 'InstanceID') -and 
+                ($Filter -eq 'InstanceID like "%ADGroup.%"') -and
+                ($Property -Contains 'InstanceID') -and
                 ($Property -Contains 'CurrentValue') -and
                 ($cimsession -ne $null) -and
                 ($ClassName -eq 'DCIM_iDRACCardAttribute') -and
                 ($NameSpace -eq 'root/dcim')
-                
+
             } -Verifiable
 
             # Act
@@ -42,7 +42,7 @@ InModuleScope -ModuleName $ENV:BHProjectName {
             # Assert
             It "Should query the correct class and namespace without any filter" {
                 Assert-MockCalled -CommandName Get-CimInstance -Times 1 -Exactly -Scope Context
-                Assert-VerifiableMocks
+                Assert-VerifiableMock
             }
 
             It "Should return the hashtable with details from mocked object" {
@@ -51,20 +51,20 @@ InModuleScope -ModuleName $ENV:BHProjectName {
             }
         }
 
-        
+
         Context "Querying the class failed" {
-            
+
             Mock -Command Get-CimInstance -MockWith {
                 Write-Error "failure"
             } -ParameterFilter {
                 # param filters her
-                ($Filter -eq 'InstanceID like "%ADGroup.%"') -and 
-                ($Property -Contains 'InstanceID') -and 
+                ($Filter -eq 'InstanceID like "%ADGroup.%"') -and
+                ($Property -Contains 'InstanceID') -and
                 ($Property -Contains 'CurrentValue') -and
                 ($cimsession -ne $null) -and
                 ($ClassName -eq 'DCIM_iDRACCardAttribute') -and
                 ($NameSpace -eq 'root/dcim')
-                
+
             } -Verifiable
 
             It "Should throw a fixed terminating error" {
@@ -72,9 +72,9 @@ InModuleScope -ModuleName $ENV:BHProjectName {
             }
 
             It "Should query the correct class and namespace" {
-                Assert-VerifiableMocks
+                Assert-VerifiableMock
             }
         }
-        
+
     }
 }
