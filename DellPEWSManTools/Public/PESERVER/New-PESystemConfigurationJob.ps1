@@ -22,8 +22,7 @@ Function New-PESystemConfigurationJob
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
-        [Parameter(Mandatory,
-                   ValueFromPipeline=$true,
+        [Parameter(ValueFromPipeline=$true,
                    ValueFromPipelineByPropertyName=$true,
                    ValueFromRemainingArguments=$false,
                    ParameterSetName='General')]
