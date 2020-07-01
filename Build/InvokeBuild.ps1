@@ -92,11 +92,12 @@ task Build Test, {
     {
         [Version]$Version = Get-NextNugetPackageVersion -Name $env:BHProjectName -PackageSourceUrl 'https://NuGET.dev.iconic-it.com/Nuget' -ErrorAction Stop
         [Version]$LocalVersion  = Get-Metadata -Path $env:BHPSModuleManifest -PropertyName ModuleVersion
+        $Build    = if($Version.Build    -le 0) { 0 } else { $Version.Build + 1 }
+        if ($LocalVersion.Build -gt $Version.Build) {$Build = $LocalVersion.Build}
+        $Revision = if($Version.Revision -le 0) { 1 } else { $LocalVersion.Revision + 1 }
         if ($LocalVersion -ge $Version) {
             $Version = $LocalVersion
         }
-        $Build    = if($Version.Build    -le 0) { 0 } else { $Version.Build }
-        $Revision = if($Version.Revision -le 0) { 1 } else { $LocalVersion.Revision + 1 }
         $Version  = New-Object System.Version ($Version.Major, $Version.Minor, $Build, $Revision)
         # write-Verbose "BHProjectName      - $env:BHProjectName" -Verbose
         write-Verbose "Version            - $Version" -Verbose
