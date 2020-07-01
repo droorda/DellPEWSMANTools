@@ -59,9 +59,11 @@ function New-PEDRACSession
             $Params.SkipCACheck = $true
             $Params.SkipCNCheck = $true
             $Params.SkipRevocationCheck = $true
+            $ComputerName = $IPAddress
+        } else {
+            $ComputerName = $HostName
         }
 
-        $ComputerName = $HostName
         $cimOptions   = New-CimSessionOption @Params
     }
 
