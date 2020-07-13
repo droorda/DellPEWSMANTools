@@ -31,3 +31,4 @@ function Approve-PESupportAssistEULA
         return $cmdresponse
     }
 }
+set-alias -name Accept-PESupportAssistEULA -value Approve-PESupportAssistEULA
