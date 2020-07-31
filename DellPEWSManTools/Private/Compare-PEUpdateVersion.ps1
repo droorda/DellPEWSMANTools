@@ -64,7 +64,12 @@ function Compare-PEUpdateVersion {
                     $UpdateVersion  = [version](($UpdateVersion.Split( '.') | Select-Object -first ($UpdateVersion.split( '.').count -1 )) -join '.')
                 }
             } else {
-                $CurrentVersion = [version]$CurrentVersion
+                # $CurrentVersion = [version]$CurrentVersion
+                if ($CurrentVersion -match '^\d+$') {
+                    $CurrentVersion  = [version]"$CurrentVersion.0"
+                } else {
+                    $CurrentVersion  = [version]$CurrentVersion
+                }
             }
             if ($Update.vendorVersion -match '^\d+$') {
                 $UpdateVersion  = [version]"$UpdateVersion.0"
