@@ -18,50 +18,35 @@ function New-PEDRACSession
         [System.Management.Automation.Credential()]
         $Credential,
 
-        [Parameter (Mandatory,
-                    ValueFromPipeline=$true,
-                    ValueFromPipelineByPropertyName=$true,
-                    ValueFromRemainingArguments=$false,
-                    ParameterSetName='ByIP')]
-        [ValidateScript({[System.Net.IPAddress]::TryParse($_,[ref]$null)})]
-        [string] $IPAddress,
+        [Parameter (Mandatory)]
+        [Alias("IPAddress","HostName")]
+        [string] $ComputerName,
 
-        [Parameter (Mandatory,
-                    ValueFromPipeline=$true,
-                    ValueFromPipelineByPropertyName=$true,
-                    ValueFromRemainingArguments=$false,
-                    ParameterSetName='ByName')]
-        [ValidateScript({
-                        try {
-                            if ([System.Net.DNS]::GetHostByName($_).AddressList.IPAddressToString.count -gt 0) {$true} else {$false}
-                        } catch {
-                            $false
-                        }
-                    })]
-        [string] $HostName,
+        [string] $Authentication = "Basic",
 
-        [Parameter (
-                    ParameterSetName='ByName')]
-        [switch] $IgnoreCertFailures,
+        [int]    $Port = 443,
 
+        [string] $Encoding = 'Utf8',
 
-        [Parameter()]
-        [int] $MaxTimeout = 60
-    )
+        [bool]   $UseSsl = $true,
+
+        [Alias("MaxTimeout")]
+        [int]    $OperationTimeoutSec = 60,
+
+        [switch] $IgnoreCertFailures
+        )
+
 
     Begin {
         $Params = @{
-            Encoding = 'Utf8'
-            UseSsl = $true
+            Encoding = $Encoding
+            UseSsl   = $UseSsl
         }
-        if ($IPAddress -or $IgnoreCertFailures)
+        if (([System.Net.IPAddress]::TryParse($ComputerName,[ref]$null)) -or $IgnoreCertFailures)
         {
             $Params.SkipCACheck = $true
             $Params.SkipCNCheck = $true
             $Params.SkipRevocationCheck = $true
-            $ComputerName = $IPAddress
-        } else {
-            $ComputerName = $HostName
         }
 
         $cimOptions   = New-CimSessionOption @Params
@@ -69,21 +54,21 @@ function New-PEDRACSession
 
     Process
     {
-        Write-Verbose "Creating iDRAC session..."
+        # Write-Verbose "Creating iDRAC session..."
 
-        if ($PSCmdlet.ShouldProcess($IPAddress,'Create iDRAC session'))
+        if ($PSCmdlet.ShouldProcess($ComputerName,'Create iDRAC session'))
         {
             try
             {
-                $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $MaxTimeout -ErrorAction Stop
+                $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $OperationTimeoutSec -ErrorAction Stop
             } catch {
                 try {
                     Start-Sleep -s 10
-                    $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $MaxTimeout -ErrorAction Stop
+                    $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $OperationTimeoutSec -ErrorAction Stop
                 } catch {
                     try {
                         Start-Sleep -s 60
-                        $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $MaxTimeout -ErrorAction Stop
+                        $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $OperationTimeoutSec -ErrorAction Stop
                     } catch {
                         $PSCmdlet.WriteError([System.Management.Automation.ErrorRecord]::new(
                             ([Exception]::new("New-PEDRACSession Failed : $($_.Exception.Message)")),
