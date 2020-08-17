@@ -42,7 +42,8 @@ function Get-PEUpdatesFromCatalog {
         # https://www.dell.com/support/article/en-us/sln312282/dell-emc-catalog-links-for-poweredge-servers?lang=en
         # TODO:switch to correct catalog 'Catalog.gz'
         [string]
-        $SourceCatalog = "${SourceServer}Catalog/Catalog.xml.gz",
+        $SourceCatalog = "${SourceServer}Catalog/Catalog.gz",
+        # $SourceCatalog = "${SourceServer}Catalog/Catalog.xml.gz",
 
         [string]
         $UpdateStageFolder = "$env:temp\DellUpdates\",
@@ -117,6 +118,7 @@ function Get-PEUpdatesFromCatalog {
         }
         Write-Verbose "Comparing Inventory to Catalog "
         Write-Verbose "Version $($XmlCatalog.Manifest.version)"
+        Write-Verbose "SystemID - $SystemID"
         $systemIDhex = '{0:X4}' -f [int]$SystemID
         Write-Verbose "systemIDhex - $systemIDhex"
         $Devices = $SoftwareIdentity.clone()
@@ -163,15 +165,28 @@ function Get-PEUpdatesFromCatalog {
                     }
                 }
             }
-            # $Update = $Update           | Where-Object {$_.packageType                                 -eq 'LW64'}
             Write-Verbose "Update Count 1: $($Update.count)"
             if ($Update){
+                $Update | Format-List `
+                        packageID,
+                        packageType,
+                        rebootrequired,
+                        schemaVersion,
+                        vendorVersion,
+                        path,
+                        @{N='systemID';E={$_.SupportedSystems.Brand.Model.systemID -join ','}},
+                        @{N='SupportedsystemID';E={$_.SupportedSystems.Brand.Model.systemID | Where-Object {$_ -eq $systemIDhex}}} |
+                        Out-String | Write-Verbose
+                # $Update | Format-List packageID,packageType,rebootrequired,schemaVersion,vendorVersion,@{N='systemID';E={$_.SupportedSystems.Brand.Model.systemID | Where-Object {$_ -eq $systemIDhex}}} | Out-String | Write-Verbose
+                # $Update | Format-List | Out-String | Write-Verbose
                 $SupportedUpdate = $Update               | Where-Object {$_.SupportedSystems.Brand.Model.systemID       -eq $systemIDhex}
                 if ($SupportedUpdate){
+                    Write-Verbose "Supported Update Found"
                     $Update = $SupportedUpdate
                     $SupportedUpdate = $null
                     $Update | Add-Member -MemberType NoteProperty -Name Supported -Value $True -Force
                 } else {
+                    Write-Verbose "No Supported Update Found"
                     Try {
                         $Update = $Update | Sort-Object {[version]$_.vendorVersion} -ErrorAction Stop | Select-Object -last 1
                     } Catch {
@@ -184,6 +199,7 @@ function Get-PEUpdatesFromCatalog {
                     }
                     $Update | Add-Member -MemberType NoteProperty -Name Supported -Value $False -Force
                 }
+                # return
             }
             #Try to Filter Downgrade options if multiple exist
             if ($Update.count -gt 1){
@@ -192,6 +208,17 @@ function Get-PEUpdatesFromCatalog {
             if ($Update.count -gt 1){
                 $Update = $Update | Where-Object {(Compare-PEUpdateVersion -Update $_ -Device $Device) -gt 0}
             }
+            # 'MCP'  - Dell Packages for Chassis Management Controller (CMC)
+            # 'LLXP' - Update Package for Red Hat Linux
+            # 'LW64' - Update Package for MS Windows 64-Bit.
+            $Update = $Update           | Where-Object {@('LW64') -contains $_.packageType }
+
+            # if ($Update.count -gt 1){
+            #     $TempUpdate = $Update           | Where-Object {$_.packageType                                 -eq 'LW64'}
+            #     if ($TempUpdate) {
+            #         $Update = $TempUpdate
+            #     }
+            # }
             #Process Found Updates
             if ($Update.count -gt 1){
                 write-Warning "$($Update.count) matches Found for $($Device.ElementName)"
@@ -209,7 +236,7 @@ function Get-PEUpdatesFromCatalog {
                 Write-Verbose " ElementName       : '$($Device.ElementName)'" -verbose
                 Write-Verbose " VersionString     : '$($Device.VersionString)'" -verbose
                 # $Device | Format-List *   | Out-String | Write-Verbose
-                $Update | Format-Table -a | Out-String | Write-Verbose
+                $Update | Format-Table -AutoSize | Out-String | Write-Verbose -Verbose
                 # $Update | Format-List     | Out-String | Write-Verbose
                 $Update = $null
                 # $Update
