@@ -9,7 +9,9 @@ This software is licensed to you under the GNU General Public License, version 2
 function Compare-PEUpdateVersion {
     <#
     .SYNOPSIS
-    Describe the function here
+    return -1 if older
+    return  0 if same
+    return  1 if newer
     .DESCRIPTION
     Describe the function in more detail
     .EXAMPLE
@@ -132,10 +134,29 @@ function Compare-PEUpdateVersion {
                     break
                 }
             }
+        } elseif ($Device.VersionString -match '^([a-zA-Z]+)(\d+)([a-zA-Z]+)(\d+)$' ) {
+            Write-Verbose "Filter 5"
+            #Example VDV1DP21  - (FOLDER05393669M/2/Express-Flash-PCIe-SSD_Firmware_90R8R_WN64_VDV1DP21_A00_01.EXE)
+            $CurrentVersion = $Device.VersionString
+            $UpdateVersion  = $Update.vendorVersion
+            $UpdateVals     = ([regex]'^(\w)(\d+)$').Match($UpdateVersion).Groups
+            For ($i=1; $i -lt $UpdateVals.count; $i++) {
+                Write-Verbose "'$($UpdateVals[$i].Value)' -eq '$($matches[$i])'"
+                if ($UpdateVals[$i].Value -eq $matches[$i]) {
+                    $Return = 0
+                } elseif ($UpdateVals[$i].Value -gt $matches[$i]) {
+                    $Return = 1
+                    break
+                } else {
+                    $Return = -1
+                    break
+                }
+            }
+
         } else {
-            Write-Warning "Unknown Version structure '$($Device.VersionString)'"
+            Write-Warning "Unknown Version structure Update Version '$($Device.VersionString)' Device Version '$($Device.VersionString)'"
             if ($Device.VersionString -ne $Update.vendorVersion){
-                $Return = 1
+                $Return = -1
             }
         }
         Write-Verbose "Returning '$Return'"
