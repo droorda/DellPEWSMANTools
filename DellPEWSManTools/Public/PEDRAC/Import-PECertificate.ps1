@@ -2,6 +2,7 @@
 Import-PECertificate.ps1 - Imports a certificate into PE DRAC.
 
 _author_ = Ravikanth Chaganti <Ravikanth_Chaganti@Dell.com> _version_ = 1.0
+_Updated_= Doug Roorda <droorda at gmail.com> = 1.1
 
 Copyright (c) 2017, Dell, Inc.
 
@@ -9,74 +10,86 @@ This software is licensed to you under the GNU General Public License, version 2
 #>
 function Import-PECertificate
 {
-    [CmdletBinding(DefaultParameterSetName='General',  
-                  PositionalBinding=$false)]
+    [CmdletBinding( DefaultParameterSetName='FileGeneral',
+                    PositionalBinding=$false)]
     [OutputType([String])]
     Param
     (
         # iDRAC Session
-        [Parameter(Mandatory=$true,
-                   Position=0,
-                   ParameterSetName='General')]
-        [Parameter(Mandatory,
-                   Position=0,
-                   ParameterSetName='Wait')]
-        [Parameter(Mandatory,
-                   Position=0,
-                   ParameterSetName='Passthru')]
+        [Parameter( Mandatory,Position=0)]
         [ValidateNotNullOrEmpty()]
-        [Alias("s")] 
+        [Alias("s")]
         $iDRACSession,
 
         # Pass phrase
-        [Parameter(ParameterSetName='General')]
-        [Parameter(ParameterSetName='Wait')]
-        [Parameter(ParameterSetName='Passthru')]
-        [Alias("pass")] 
+        [Parameter(ParameterSetName='FileGeneral')]
+        [Parameter(ParameterSetName='FileWait')]
+        [Parameter(ParameterSetName='FilePassthru')]
+        [Alias("pass")]
         [SecureString]
         $passphrase,
 
         # Certificate Filename
-        [Parameter(Mandatory,ParameterSetName='General')]
-        [Parameter(Mandatory,ParameterSetName='Wait')]
-        [Parameter(Mandatory,ParameterSetName='Passthru')]
+        [Parameter(Mandatory,ParameterSetName='FileGeneral')]
+        [Parameter(Mandatory,ParameterSetName='FileWait')]
+        [Parameter(Mandatory,ParameterSetName='FilePassthru')]
         [ValidateNotNull()]
         [ValidateNotNullOrEmpty()]
-        [Alias("cert")] 
+        [Alias("cert")]
         [string]
         $certificateFileName,
 
+        # Certificate
+        [Parameter(Mandatory,ParameterSetName='CertGeneral')]
+        [Parameter(Mandatory,ParameterSetName='CertWait')]
+        [Parameter(Mandatory,ParameterSetName='CertPassthru')]
+        [ValidateNotNull()]
+        [ValidateNotNullOrEmpty()]
+        [System.Security.Cryptography.X509Certificates.X509Certificate2]
+        $certificate,
+
         # Web Server Certificate
-        [Parameter(ParameterSetName='General')]
-        [Parameter(ParameterSetName='Wait')]
-        [Parameter(ParameterSetName='Passthru')]
-        [Alias("wsc")] 
+        [Parameter(ParameterSetName='FileGeneral')]
+        [Parameter(ParameterSetName='FileWait')]
+        [Parameter(ParameterSetName='FilePassthru')]
+        [Parameter(ParameterSetName='CertGeneral')]
+        [Parameter(ParameterSetName='CertWait')]
+        [Parameter(ParameterSetName='CertPassthru')]
+        [Alias("wsc")]
         [switch]
         $webServerCertificate,
 
         # AD Service Certificate
-        [Parameter(ParameterSetName='General')]
-        [Parameter(ParameterSetName='Wait')]
-        [Parameter(ParameterSetName='Passthru')]
-        [Alias("asc")] 
+        [Parameter(ParameterSetName='FileGeneral')]
+        [Parameter(ParameterSetName='FileWait')]
+        [Parameter(ParameterSetName='FilePassthru')]
+        [Parameter(ParameterSetName='CertGeneral')]
+        [Parameter(ParameterSetName='CertWait')]
+        [Parameter(ParameterSetName='CertPassthru')]
+        [Alias("asc")]
         [switch]
         $ADServiceCertificate,
 
         # Custom Signing Certificate
-        [Parameter(ParameterSetName='General')]
-        [Parameter(ParameterSetName='Wait')]
-        [Parameter(ParameterSetName='Passthru')]
-        [Alias("csc")] 
+        [Parameter(ParameterSetName='FileGeneral')]
+        [Parameter(ParameterSetName='FileWait')]
+        [Parameter(ParameterSetName='FilePassthru')]
+        [Parameter(ParameterSetName='CertGeneral')]
+        [Parameter(ParameterSetName='CertWait')]
+        [Parameter(ParameterSetName='CertPassthru')]
+        [Alias("csc")]
         [switch]
         $customSigningCertificate,
 
         # Wait for job completion
-        [Parameter(ParameterSetName='Wait')]
+        [Parameter(ParameterSetName='FileWait')]
+        [Parameter(ParameterSetName='CertWait')]
 		[Switch]
         $Wait,
 
         # Privilege
-        [Parameter(ParameterSetName='Passthru')]
+        [Parameter(ParameterSetName='FilePassthru')]
+        [Parameter(ParameterSetName='CertPassthru')]
 		[Switch]
         $Passthru
     )
@@ -93,13 +106,58 @@ function Import-PECertificate
             Throw "ERROR: Missing certificate type"
         }
 
-        if ( ($webServerCertificate -and $ADServiceCertificate) -or ($ADServiceCertificate -and $customSigningCertificate) -or ($webServerCertificate -and $customSigningCertificate) ) 
+        if ( ($webServerCertificate -and $ADServiceCertificate) -or ($ADServiceCertificate -and $customSigningCertificate) -or ($webServerCertificate -and $customSigningCertificate) )
         {
             Throw "ERROR: Cannot process multiple certificate types"
         }
 
-    
-        if ( $certificateFileName ) 
+        # if ($certificateObject){
+        #     $certificateFileName = New-TemporaryFile | rename-item -NewName {"$($_.BaseName).pfx"} -passThru
+        #     $certificateFileName | remove-item -ErrorAction Stop
+        #     [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
+
+        #     # $passphrase = $(ConvertTo-SecureString  ([System.Web.Security.Membership]::GeneratePassword(32,3)) -AsPlainText  -Force)
+        #     $passphrase = $(ConvertTo-SecureString  (Get-Random) -AsPlainText  -Force)
+        #     Export-PfxCertificate -Cert $certificateObject -Password $passphrase -FilePath $certificateFileName | Out-Null
+
+        #     $OpenSSLexe        = "\\local\sys\Software\OpenSSL\Win64OpenSSL-1_1_0b\bin\openssl.exe"
+        #     $tempCred = New-Object -Typename PSCredential -ArgumentList 'temp',$passphrase
+        #     $seed2 = $tempCred.GetNetworkCredential().Password
+
+        #     $Files = @{
+        #         Cer     = New-TemporaryFile | rename-item -NewName {"$($_.BaseName).CER"} -passThru
+        #         Key     = New-TemporaryFile | rename-item -NewName {"$($_.BaseName).KEY"} -passThru
+        #         RootCer = New-TemporaryFile | rename-item -NewName {"$($_.BaseName).CER"} -passThru
+        #     }
+        #     $Files.values | Where-Object {$_} | ForEach-Object {if (Test-Path($_)) {remove-item $_ -ErrorAction Stop}}
+        #     $Files.Pfx = $certificateFileName
+        #     write-verbose "Calling:'$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -passout pass: -cacerts -out $($Files.RootCer)'"
+        #     &$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nokeys -cacerts -out $($Files.RootCer) 2>&1 | Write-Verbose
+        #     if ($LASTEXITCODE -ne 0) { write-warning "Error $LASTEXITCODE Exporting ROOT Key"    ; break }
+        #     write-verbose '-------------------------------------------------------------------------'
+        #     write-verbose "Calling:'$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nokeys -clcerts      -out $($Files.Cer)'"
+        #     &$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nokeys -clcerts      -out $($Files.Cer) 2>&1 | Write-Verbose
+        #     if ($LASTEXITCODE -ne 0) { write-warning "Error $LASTEXITCODE Exporting Public Key"  ; break }
+        #     write-verbose '-------------------------------------------------------------------------'
+        #     write-verbose "Calling:'$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nocerts -nodes       -out $($Files.Key)'"
+        #     &$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nocerts -nodes       -out $($Files.Key) 2>&1 | Write-Verbose
+        #     if ($LASTEXITCODE -ne 0) { write-warning "Error $LASTEXITCODE Exporting Private Key" ; break }
+        #     write-verbose '-------------------------------------------------------------------------'
+
+        #     # $data = Get-Content -Path $certificateFileName -Encoding String -Raw
+        #     $data  = Get-Content -Path $Files.RootCer -Encoding String -Raw
+        #     $data += Get-Content -Path $Files.Cer     -Encoding String -Raw
+        #     $data += Get-Content -Path $Files.Key     -Encoding String -Raw
+        #     $certificateFileName | remove-item -ErrorAction Stop
+        #     $certificate = [System.Convert]::ToBase64String( [System.Text.Encoding]::UTF8.GetBytes($data))
+
+        #     if ( $certificate.Length -eq 0 )
+        #     {
+        #         Throw "ERROR: No certificate found in file specified"
+        #     }
+        # }
+
+        if ( $certificateFileName )
         {
             $data = Get-Content -Path $certificateFileName -Encoding String -Raw
             $certificate = [System.Convert]::ToBase64String( [System.Text.Encoding]::UTF8.GetBytes($data))
