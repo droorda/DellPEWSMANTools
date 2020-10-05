@@ -18,8 +18,8 @@ Import-Module (Join-Path $ENV:BHProjectPath $ENV:BHProjectName)
 InModuleScope -ModuleName $ENV:BHProjectName {
 
     $PEDRACSessionParamHash = @{
-        IPAddress = '192.168.1.1'
-        Credential = $(New-Object -TypeName PSCredential -ArgumentList 'root', $(ConvertTo-SecureString -String 'calvin' -AsPlainText -Force))
+        IPAddress = '192.168.223.165'
+        Credential = $(New-Object -TypeName PSCredential -ArgumentList 'root', $(ConvertTo-SecureString -String 'EPG35x!' -AsPlainText -Force))
     }
     Describe 'New-PEDRACSession' -Tag UnitTest {
 
