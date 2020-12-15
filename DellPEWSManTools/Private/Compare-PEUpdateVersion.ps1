@@ -154,7 +154,7 @@ function Compare-PEUpdateVersion {
             }
 
         } else {
-            Write-Warning "Unknown Version structure Update Version '$($Device.VersionString)' Device Version '$($Device.VersionString)'"
+            Write-Warning "Unknown Version structure Update Version '$($Update.vendorVersion)' Device Version '$($Device.VersionString)'"
             if ($Device.VersionString -ne $Update.vendorVersion){
                 $Return = -1
             }
