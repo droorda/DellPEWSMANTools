@@ -134,17 +134,17 @@ function Compare-PEUpdateVersion {
                     break
                 }
             }
-        } elseif ($Device.VersionString -match '^([a-zA-Z]+)(\d+)([a-zA-Z]+)(\d+)$' ) {
+        } elseif (($Device.VersionString -match '^([a-zA-Z]+)(\d+)([a-zA-Z]+)(\d+)?$' ) -and ($Device.VersionString.length -eq $Update.vendorVersion.length)) {
             Write-Verbose "Filter 5"
             #Example VDV1DP21  - (FOLDER05393669M/2/Express-Flash-PCIe-SSD_Firmware_90R8R_WN64_VDV1DP21_A00_01.EXE)
+            #Example DL6N      - (Serial-ATA_Firmware_Y1P10_WN64_DL6R_A00.EXE)
             $CurrentVersion = $Device.VersionString
             $UpdateVersion  = $Update.vendorVersion
-            $UpdateVals     = ([regex]'^(\w)(\d+)$').Match($UpdateVersion).Groups
-            For ($i=1; $i -lt $UpdateVals.count; $i++) {
-                Write-Verbose "'$($UpdateVals[$i].Value)' -eq '$($matches[$i])'"
-                if ($UpdateVals[$i].Value -eq $matches[$i]) {
+            For ($i=1; $i -lt $CurrentVersion.length; $i++) {
+                Write-Verbose "'$($CurrentVersion[$i])' -eq '$($UpdateVersion[$i])'"
+                if ($CurrentVersion[$i] -eq $UpdateVersion[$i]) {
                     $Return = 0
-                } elseif ($UpdateVals[$i].Value -gt $matches[$i]) {
+                } elseif ($CurrentVersion[$i] -lt $UpdateVersion[$i]) {
                     $Return = 1
                     break
                 } else {
