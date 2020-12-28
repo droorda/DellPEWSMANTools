@@ -29,8 +29,9 @@ function Get-PESoftwareInventory
         [int]
         $SystemID
         ,
+        [ValidateSet("LIN","WIN64")]
         [String]
-        $osCode
+        $osCode = "LIN"
     )
 
     Begin {
