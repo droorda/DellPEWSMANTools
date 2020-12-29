@@ -33,8 +33,7 @@ function Get-DellCatalog
             try {
                 $remoteLastModified = [System.Net.HttpWebRequest]::Create("$DellCatalog").GetResponse().LastModified -as [DateTime]
             } catch {
-                Write-Verbose $_
-                throw "Unable to Check for latest Version of $DellCatalog"
+                Write-Warning "Unable to Check for latest Version of $DellCatalog `n  $($_.exception.message)"
             }
         }
 
@@ -44,6 +43,10 @@ function Get-DellCatalog
                 Remove-Item $outFile -ErrorAction Continue
             } else {
                 Write-Verbose "Using Cached Catalog.xml"
+            }
+        } else {
+            if (-not $remoteLastModified) {
+                Throw "Unable to access Dell Catalog"
             }
         }
 
