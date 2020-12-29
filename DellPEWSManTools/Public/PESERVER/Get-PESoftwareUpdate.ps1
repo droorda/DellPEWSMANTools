@@ -1,4 +1,3 @@
-
 function Get-PESoftwareUpdate
 {
     [CmdletBinding(DefaultParameterSetName='iDRACSession')]
@@ -74,7 +73,9 @@ function Get-PESoftwareUpdate
             }
             Write-Verbose "  Device Filter : '$($Filter)'"
             $Update = $XmlCatalog.SelectNodes("/Manifest/SoftwareComponent[$Filter]")
+            # if updates are found for Device
             if ($Update.count -ge 1) {
+                # Determine if there are updates appoved for the current server model
                 if ($Update | Where-Object {($_.packageType -eq $packageType) -and ($_.SupportedSystems.Brand.Model.systemID -contains $systemIDhex)}) {
                     Write-Verbose "    SupportedUpdate - True"
                     $SupportedUpdate = $True
@@ -92,9 +93,19 @@ function Get-PESoftwareUpdate
                     }
                 }
                 if ($Update.Count -gt 1) {
-                    $Device | Format-List | Out-String | Write-Host -ForegroundColor Red
-                    $Update | Format-List | Out-String | Write-Host -ForegroundColor Yellow
-                    Throw "Multiple Updates should not happen"
+                    if       (-not ($Update.dellVersion   -notmatch '^(\D)(\d\d)$'                  )) {
+                        # Example A00
+                        $Update = $Update | Sort-Object {[String]  $_.dellVersion  } | Select-Object -Last 1
+                    } elseif (-not ($Update.dellVersion   -notmatch '^\d+\.\d+(?>\.\d+)?(?>\.\d+)?$')) {
+                        # Example 1.2 , 1.2.3 , 1.2.3.4
+                        $Update = $Update | Sort-Object {[Version] $_.dellVersion  } | Select-Object -Last 1
+                    } elseif (-not ($Update.vendorVersion -notmatch '^\d+\.\d+(?>\.\d+)?(?>\.\d+)?$')) {
+                        # Example 1.2 , 1.2.3 , 1.2.3.4
+                        $Update = $Update | Sort-Object {[Version] $_.vendorVersion} | Select-Object -Last 1
+                    } else {
+                        # This is lazy way of handling dells inconsistent versioning. Just assuming newest update was released last
+                        $Update = $Update | Sort-Object {[DateTime]$_.releaseDate  } | Select-Object -Last 1
+                    }
                 }
 
                 Write-Verbose "  $($Device.VersionString) -eq $($Update.vendorVersion)"
