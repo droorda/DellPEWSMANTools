@@ -218,3 +218,33 @@ function Import-PECertificate
         }
     }
 }
+
+
+
+<#
+https://downloads.dell.com/manuals/common/Dell-iDRACCardProfile-1.5.pdf
+
+
+
+https://downloads.dell.com/manuals/common/Dell-LCManagementProfile-1.3.pdf
+
+9.14    Replace iDRAC Web Server client certificate and private key
+A)  Replace the iDRAC Web Server client certificate and private key using the
+    SetCertificateAndPrivateKey() method, construct the input parameters per Table 27
+B)  INVOKE the SetCertificateAndPrivateKey() method
+    Class URI:
+    http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/root/dcim/DCIM_LCService?SystemCreationClassName=DCIM_ComputerSystem+CreationClassName=DCIM_LCService+SystemName=DCIM:ComputerSystem+Name=DCIM:LCService
+9.15    Replace iDRAC Web Server public certificate
+A)  Replace the iDRAC Web Server public certificate using the SetPublicCertificate() method,
+    construct the input parameters per Table 29
+B)  INVOKE the SetPublicCertificate() method
+    Class URI:
+    http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/root/dcim/DCIM_LCService?SystemCreationClassName=DCIM_ComputerSystem+CreationClassName=DCIM_LCService+SystemName=DCIM:ComputerSystem+Name=DCIM:LCService
+
+
+
+
+
+
+
+#>
