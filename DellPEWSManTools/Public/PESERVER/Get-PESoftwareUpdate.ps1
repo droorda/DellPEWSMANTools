@@ -11,13 +11,25 @@ function Get-PESoftwareUpdate
         $iDRACSession
         ,
         [string]
-        $DellCatalog  = "https://downloads.dell.com/Catalog/Catalog.gz"
+        $DellCatalogAddress  = "https://downloads.dell.com"
+        ,
+        [string]
+        $DellCatalogLocation  = "Catalog"
+        ,
+        [string]
+        $DellCatalogName  = "Catalog.gz"
+        ,
+        [string]
+        $DellCatalog  = "$DellCatalogAddress/$DellCatalogLocation/$DellCatalogName"
         ,
         [string]
         $UpdateStageFolder = "$env:temp\DellUpdates\"
         ,
         [switch]
         $AllowUnsupported
+        ,
+        [switch]
+        $AllowDowngrade
         ,
         [Parameter(Mandatory, ParameterSetName='SoftwareInventory')]
         [Parameter(HelpMessage='Output from Get-PESoftwareInventory')]
@@ -38,6 +50,7 @@ function Get-PESoftwareUpdate
     )
 
     Begin {
+        $Updates = @()
     }
     Process
     {
@@ -59,8 +72,8 @@ function Get-PESoftwareUpdate
         # $SoftwareBundle.Contents.Package
 
         foreach ($Device in $PESoftwareInventory){
+            # $Device = $PESoftwareInventory[20]
             Write-Verbose "Checking '$($Device.ComponentType) - $($Device.ElementName)'"
-
             if ($Device.ComponentID) {
                 $Filter = "ComponentType/@value='$($Device.ComponentType)'"
                 $Filter += " and SupportedDevices/Device/@componentID='$($Device.ComponentID)'"
@@ -107,24 +120,50 @@ function Get-PESoftwareUpdate
                         $Update = $Update | Sort-Object {[DateTime]$_.releaseDate  } | Select-Object -Last 1
                     }
                 }
+                $Update = $Update.clone()
+                # Code to handle Version abnormalities
 
-                Write-Verbose "  $($Device.VersionString) -eq $($Update.vendorVersion)"
-                if ($Device.VersionString -eq $Update.vendorVersion) {
+                # Handle systems that do not haveInternal SD Module
+                if ($Device.VersionString -eq 'NA'){
+                    continue
+                }
+                # HandleOS Collector Version Behavior
+                if ($Device.VersionString -match '^\d+$') {
+                    $Device.VersionString  = "$($Device.VersionString).0"
+                }
+
+                Write-Verbose "    '$($Device.VersionString)' -eq '$($Update.vendorVersion)'"
+
+                Try {
+                    $DeviceVersionString = [Version]$Device.VersionString
+                    $UpdatevendorVersion = [Version]$Update.vendorVersion
+                } catch {
+                    $DeviceVersionString = $Device.VersionString
+                    $UpdatevendorVersion = $Update.vendorVersion
+                    Write-Verbose "      Unable to convert VersionStrings to [Version]"
+                }
+
+                if ($DeviceVersionString -eq $UpdatevendorVersion) {
                     Write-Verbose "    Firmware Up To Date"
+                } elseif (($DeviceVersionString -is [version]) -and ($DeviceVersionString -gt $UpdatevendorVersion) -and (-not $AllowDowngrade)) {
+                    Write-Verbose "    Firmware Up Date is a Downgrade"
                 } else {
                     if ($SupportedUpdate -or $AllowUnsupported) {
                         Write-Verbose "    Firmware Up Date Needed"
                         $Update | Add-Member -MemberType NoteProperty -Name Device -Value $Device -force
-                        $Update
+                        $Updates += $Update
                     } else {
                         # $Update | FL | Out-String | Write-Host -ForegroundColorCyan
-                        Write-Verbose "    Unsupported Update Found`n    $($Update.path)`n    $($Update.Description.Display.'#cdata-section')"
+                        Write-Warning "    Unsupported Update Found`n    $($Update.path)`n    $($Update.Description.Display.'#cdata-section')"
                     }
                 }
             } else {
                 Write-Verbose "    No Firmware Found For Device"
             }
         }
+    }
+    END {
+        $Updates | Group-Object path | ForEach-Object {$Temp = $_.Group[0] ; $Temp.Device = $_.Group.Device; $Temp}
     }
 }
 
