@@ -17,10 +17,11 @@ Function New-PEJobQueue
         [ValidateNotNullOrEmpty()]
         $iDRACSession,
 
-        [Parameter(Mandatory,
-                   ValueFromPipeline=$true,
-                   ValueFromPipelineByPropertyName=$true,
-                   ValueFromRemainingArguments=$false)]
+        [Parameter(
+                    Mandatory,
+                    ValueFromPipeline=$true,
+                    ValueFromPipelineByPropertyName=$true,
+                    ValueFromRemainingArguments=$false)]
         [string]$JobID,
 
         [Parameter()]
