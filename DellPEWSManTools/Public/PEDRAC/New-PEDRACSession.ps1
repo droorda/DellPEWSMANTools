@@ -33,7 +33,9 @@ function New-PEDRACSession
         [Alias("MaxTimeout")]
         [int]    $OperationTimeoutSec = 60
         ,
-        [switch] $IgnoreCertFailures
+        [Alias("IgnoreCertFailures")]
+        [switch]
+        $IgnoreCertFailure
         )
 
 
@@ -72,7 +74,8 @@ function New-PEDRACSession
                         Start-Sleep -s 60
                         $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $OperationTimeoutSec -ErrorAction Stop
                     } catch {
-                        Throw "New-PEDRACSession Failed : $($_.Exception.Message)"
+                        # Throw "New-PEDRACSession Failed : $($_.Exception.Message)"
+                        $PSCmdlet.ThrowTerminatingError($_)
                     }
                 }
             }
