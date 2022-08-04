@@ -70,8 +70,8 @@ function New-PEDRACSession
                     $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $OperationTimeoutSec -ErrorAction Stop
                 } catch {
                     try {
-                        Write-Verbose $_.exception.message
-                        Start-Sleep -s 60
+                        Write-Warning $_.exception.message
+                        Start-Sleep -s 10
                         $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $OperationTimeoutSec -ErrorAction Stop
                     } catch {
                         # Throw "New-PEDRACSession Failed : $($_.Exception.Message)"

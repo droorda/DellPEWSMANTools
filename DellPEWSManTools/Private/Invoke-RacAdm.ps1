@@ -9,11 +9,23 @@ This software is licensed to you under the GNU General Public License, version 2
 $ScriptPath = split-path $Script:MyInvocation.MyCommand.Path -parent
 
 function Invoke-RacAdm {
+    [CmdletBinding()]
     Param(
-        $racexe            = "$ScriptPath\BIN\rac5\racadm.exe",
-        $DracInfo,
-        [switch]$ignoreCertFailures,
+        $racexe            = "$ScriptPath\BIN\rac5\racadm.exe"
+        ,
+        $DracInfo
+        ,
+        [switch]$ignoreCertFailures
+        ,
         [string]$command
+        ,
+        [Switch]$ReturnData
+        ,
+        [int]$TimeOut = 90000
+        ,
+        [int]$RetryCount = 6
+        ,
+        [int]$RetryDelay = 300
     )
     begin {
         Write-Verbose "-------------Start $($myInvocation.InvocationName) IN '$((Get-MyFunctionLocation).ScriptName)' -----------------"
@@ -30,32 +42,45 @@ function Invoke-RacAdm {
             }
         }
 
-        $return = $false
-        for($i=1; $i -le 6; $i++){
-            write-verbose "racadm command attempt $i"
-            if ($ignoreCertFailures){
-                write-verbose "$racexe -r $($DracInfo.HostName) -u $($DracInfo.Credential.UserName) -p $($DracInfo.Credential.GetNetworkCredential().Password) $command"
-                $return = &$racexe -r $($DracInfo.HostName) -u $($DracInfo.Credential.UserName) -p $($DracInfo.Credential.GetNetworkCredential().Password) $($command.split(" ")) 2>&1
-            } else {
-                write-verbose "$racexe -S -r $($DracInfo.HostName) -u $($DracInfo.Credential.UserName) -p $($DracInfo.Credential.GetNetworkCredential().Password) $command"
-                $return = &$racexe -S -r $($DracInfo.HostName) -u $($DracInfo.Credential.UserName) -p $($DracInfo.Credential.GetNetworkCredential().Password) $($command.split(" ")) 2>&1
+        for($i=0; $i -le $RetryCount; $i++){
+            write-verbose "racadm command attempt $($i + 1)"
+            $racArgs = @()
+            if (-not $ignoreCertFailures){
+                $racArgs += '-S'
             }
-            if ($LASTEXITCODE -ne 0) {
-                write-warning "Retry $i : Error $LASTEXITCODE on $($DracInfo.HostName) running command $command"
-                write-warning "$return"
-                Start-Sleep -s 300
+            $racArgs += '-r'
+            $racArgs += $DracInfo.HostName
+            $racArgs += '-u'
+            $racArgs += $DracInfo.Credential.UserName
+            $racArgs += '-p'
+            $racArgs += $DracInfo.Credential.GetNetworkCredential().Password
+            $racArgs += $command
+
+            # $return = &$racexe -S -r $($DracInfo.HostName) -u $($DracInfo.Credential.UserName) -p $($DracInfo.Credential.GetNetworkCredential().Password) $($command.split(" ")) 2>&1
+
+            Write-Verbose "Invoke-Executable -sExeFile $racexe -cArgs ($($racArgs -join ',')) -TimeOut $TimeOut -Verbose"
+            $Results = Invoke-Executable -sExeFile $racexe -cArgs $racArgs -TimeOut $TimeOut -Verbose
+
+
+            if ($Results.ExitCode -ne 0) {
+                write-warning "Attempt $($i + 1)`n         Error $($Results.ExitCode) on $($DracInfo.HostName) running command $command`n         $($Results.StdErr)`n         $($Results.StdOut)"
+                Start-Sleep -s $RetryDelay
                 # if ($i -eq 3) {
                 #     write-warning "Triggering Reset of iDRAC"
                 #     Restart-DRAC $DracInfo -ignoreCertFailures:$ignoreCertFailures
 
                 # }
+                return $Results.ExitCode
             } else {
                 Write-Verbose "Command Succeded"
-                Start-Sleep -s 30
-                return $LASTEXITCODE
+                # Start-Sleep -s 30
+                if ($ReturnData) {
+                    return (ConvertFrom-RacAdm $Results.StdOut)
+                } else {
+                    return $Results.ExitCode
+                }
             }
         }
-        return $LASTEXITCODE
     }
     End {
         Write-Verbose "--------------END- $($myInvocation.InvocationName) -----------------"
