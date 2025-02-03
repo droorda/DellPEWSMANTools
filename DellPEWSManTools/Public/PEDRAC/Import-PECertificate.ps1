@@ -99,7 +99,7 @@ function Import-PECertificate
         $properties=@{SystemCreationClassName="DCIM_ComputerSystem";SystemName="DCIM:ComputerSystem";CreationClassName="DCIM_iDRACCardService";Name="DCIM:iDRACCardService";}
         $instance = New-CimInstance -ClassName DCIM_iDRACCardService -Namespace root/dcim -ClientOnly -Key @($properties.keys) -Property $properties
 
-        $params=@{}
+        # $params=@{}
 
         if ( !$webServerCertificate -and !$ADServiceCertificate -and !$customSigningCertificate )
         {
@@ -157,63 +157,64 @@ function Import-PECertificate
         #     }
         # }
 
-        if ( $certificateFileName )
-        {
-            $data = Get-Content -Path $certificateFileName -Encoding String -Raw
-            $certificate = [System.Convert]::ToBase64String( [System.Text.Encoding]::UTF8.GetBytes($data))
+        # if ( $certificateFileName )
+        # {
+        #     $data = Get-Content -Path $certificateFileName -Encoding String -Raw
+        #     $certificate = [System.Convert]::ToBase64String( [System.Text.Encoding]::UTF8.GetBytes($data))
 
-            if ( $certificate.Length -eq 0 )
-            {
-                Throw "ERROR: No certificate found in file specified"
-            }
-        }
+        #     if ( $certificate.Length -eq 0 )
+        #     {
+        #         Throw "ERROR: No certificate found in file specified"
+        #     }
+        # }
 
         $params=@{}
 
-        if ($certificate)
-        {
-            $params.SSLCertificateFile = $certificate
+            # $passphrase = $(ConvertTo-SecureString  ([System.Web.Security.Membership]::GeneratePassword(32,3)) -AsPlainText  -Force)
+            $passphrase = Get-Random
+            $Secpassphrase = $(ConvertTo-SecureString  $passphrase -AsPlainText  -Force)
+            $CertFile = Export-PfxCertificate -Cert $certificate -Password $Secpassphrase -FilePath "$env:temp\TempCert.pfx"
+            $params.SSLCertificateFile = $CertFile.FullName
+            $params.Passphrase = $passphrase
+
+        if ($certificate) {
+            $PEMCertificate = Convert-CertificateToPEM -Certificate $certificate
+            $params.SSLCertificateFile = "$($PEMCertificate.Public + $PEMCertificate.Private)"
         }
 
-        if ($passphrase)
-        {
-            # First create the credential out of the secure string and then fetch the clear text value of passphrase
-            $tempCred = New-Object -Typename PSCredential -ArgumentList 'temp',$passphrase
-            $params.Passphrase = $tempCred.GetNetworkCredential().Password
-        }
+        # if ($passphrase)
+        # {
+        #     # First create the credential out of the secure string and then fetch the clear text value of passphrase
+        #     $tempCred = New-Object -Typename PSCredential -ArgumentList 'temp',$passphrase
+        #     $params.Passphrase = $tempCred.GetNetworkCredential().Password
+        # }
 
-        if ($webServerCertificate)
-        {
+        if ($webServerCertificate) {
             $params.CertificateType = "1"
-        }
-        elseif ($ADServiceCertificate)
-        {
+        } elseif ($ADServiceCertificate) {
             $params.CertificateType = "2"
-        }
-        else
-        {
+        } else {
             $params.CertificateType = "3"
         }
-    }
-    Process
-    {
 
-        Write-Verbose "Importing Certificate to $($iDRACsession.ComputerName)"
+
+
+        # $result = Invoke-CimMethod -CimSession $session -InputObject $iCardService -MethodName 'ImportSSLCertificate' -Arguments @{SSLCertificateFile=$certdata;CertificateType=1}
+
+    }
+    Process {
+
+        Write-Verbose "Importing Certificate to $($iDRACsession.ComputerName)`n$($Params | Format-List | Out-String)"
         $responseData = Invoke-CimMethod -InputObject $instance -MethodName ImportSSLCertificate -CimSession $iDRACsession -Arguments $params #2>&1
-        if ($responseData.ReturnValue -eq 4096)
-        {
-            if ($Passthru)
-            {
+        $responseData
+        if ($responseData.ReturnValue -eq 4096) {
+            if ($Passthru) {
                 $responseData
-            }
-            elseif ($Wait)
-            {
+            } elseif ($Wait) {
                 Wait-PEConfigurationJob -iDRACSession $iDRACsession -JobID $responseData.Job.EndpointReference.InstanceID -Activity "Configuring Standard Schema Settings for $($iDRACsession.ComputerName)"
                 Write-Verbose "Imported Certificate to $($iDRACsession.ComputerName) successfully"
             }
-        }
-        else
-        {
+        } else {
             Throw "Certificate Import to $($iDRACsession.ComputerName) failed with error: $($responseData.Message)"
         }
     }
