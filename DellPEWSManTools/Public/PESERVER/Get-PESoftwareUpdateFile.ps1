@@ -1,4 +1,4 @@
-function Get-PESoftwareUpdateFile
+function Get-PERFSoftwareUpdateFile
 {
     Param
     (
