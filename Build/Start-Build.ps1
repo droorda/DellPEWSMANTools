@@ -20,7 +20,7 @@ param(
 
 $env:FeedUrl = $FeedUrl
 $env:ApiKey  = $ApiKey
-$env:Beta    = $Beta
+$env:BHBuildBeta = $Beta
 
 # dependencies
 Import-Module  -Name PackageManagement
