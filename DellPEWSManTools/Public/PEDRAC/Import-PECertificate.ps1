@@ -120,36 +120,37 @@ function Import-PECertificate
         #     $passphrase = $(ConvertTo-SecureString  (Get-Random) -AsPlainText  -Force)
         #     Export-PfxCertificate -Cert $certificateObject -Password $passphrase -FilePath $certificateFileName | Out-Null
 
-        #     $OpenSSLexe        = "\\local\sys\Software\OpenSSL\Win64OpenSSL-1_1_0b\bin\openssl.exe"
+        #     $OpenSSLexe        = "\\local\sys\Software\OpenSSL\x64\1.0.1\openssl.exe"
         #     $tempCred = New-Object -Typename PSCredential -ArgumentList 'temp',$passphrase
-        #     $seed2 = $tempCred.GetNetworkCredential().Password
+            # $seed2 = $tempCred.GetNetworkCredential().Password
+            # $seed2 = $passphrase
 
-        #     $Files = @{
-        #         Cer     = New-TemporaryFile | rename-item -NewName {"$($_.BaseName).CER"} -passThru
-        #         Key     = New-TemporaryFile | rename-item -NewName {"$($_.BaseName).KEY"} -passThru
-        #         RootCer = New-TemporaryFile | rename-item -NewName {"$($_.BaseName).CER"} -passThru
-        #     }
-        #     $Files.values | Where-Object {$_} | ForEach-Object {if (Test-Path($_)) {remove-item $_ -ErrorAction Stop}}
-        #     $Files.Pfx = $certificateFileName
-        #     write-verbose "Calling:'$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -passout pass: -cacerts -out $($Files.RootCer)'"
-        #     &$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nokeys -cacerts -out $($Files.RootCer) 2>&1 | Write-Verbose
-        #     if ($LASTEXITCODE -ne 0) { write-warning "Error $LASTEXITCODE Exporting ROOT Key"    ; break }
-        #     write-verbose '-------------------------------------------------------------------------'
-        #     write-verbose "Calling:'$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nokeys -clcerts      -out $($Files.Cer)'"
-        #     &$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nokeys -clcerts      -out $($Files.Cer) 2>&1 | Write-Verbose
-        #     if ($LASTEXITCODE -ne 0) { write-warning "Error $LASTEXITCODE Exporting Public Key"  ; break }
-        #     write-verbose '-------------------------------------------------------------------------'
-        #     write-verbose "Calling:'$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nocerts -nodes       -out $($Files.Key)'"
-        #     &$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nocerts -nodes       -out $($Files.Key) 2>&1 | Write-Verbose
-        #     if ($LASTEXITCODE -ne 0) { write-warning "Error $LASTEXITCODE Exporting Private Key" ; break }
-        #     write-verbose '-------------------------------------------------------------------------'
+            # $Files = @{
+            #     Cer     = New-TemporaryFile | rename-item -NewName {"$($_.BaseName).CER"} -passThru
+            #     Key     = New-TemporaryFile | rename-item -NewName {"$($_.BaseName).KEY"} -passThru
+            #     RootCer = New-TemporaryFile | rename-item -NewName {"$($_.BaseName).CER"} -passThru
+            # }
+            # $Files.values | Where-Object {$_} | ForEach-Object {if (Test-Path($_)) {remove-item $_ -ErrorAction Stop}}
+            # $Files.Pfx = $certificateFileName
+            # write-verbose "Calling:'$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -passout pass: -cacerts -out $($Files.RootCer)'"
+            # &$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nokeys -cacerts -out $($Files.RootCer) 2>&1 | Write-Verbose
+            # if ($LASTEXITCODE -ne 0) { write-warning "Error $LASTEXITCODE Exporting ROOT Key"    ; break }
+            # write-verbose '-------------------------------------------------------------------------'
+            # write-verbose "Calling:'$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nokeys -clcerts      -out $($Files.Cer)'"
+            # &$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nokeys -clcerts      -out $($Files.Cer) 2>&1 | Write-Verbose
+            # if ($LASTEXITCODE -ne 0) { write-warning "Error $LASTEXITCODE Exporting Public Key"  ; break }
+            # write-verbose '-------------------------------------------------------------------------'
+            # write-verbose "Calling:'$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nocerts -nodes       -out $($Files.Key)'"
+            # &$OpenSSLexe pkcs12 -in $($Files.Pfx) -passin pass:$seed2 -nocerts -nodes       -out $($Files.Key) 2>&1 | Write-Verbose
+            # if ($LASTEXITCODE -ne 0) { write-warning "Error $LASTEXITCODE Exporting Private Key" ; break }
+            # write-verbose '-------------------------------------------------------------------------'
 
-        #     # $data = Get-Content -Path $certificateFileName -Encoding String -Raw
-        #     $data  = Get-Content -Path $Files.RootCer -Encoding String -Raw
-        #     $data += Get-Content -Path $Files.Cer     -Encoding String -Raw
-        #     $data += Get-Content -Path $Files.Key     -Encoding String -Raw
-        #     $certificateFileName | remove-item -ErrorAction Stop
-        #     $certificate = [System.Convert]::ToBase64String( [System.Text.Encoding]::UTF8.GetBytes($data))
+            # # $data = Get-Content -Path $certificateFileName -Encoding String -Raw
+            # $data  = Get-Content -Path $Files.RootCer -Encoding String -Raw
+            # $data += Get-Content -Path $Files.Cer     -Encoding String -Raw
+            # $data += Get-Content -Path $Files.Key     -Encoding String -Raw
+            # $certificateFileName | remove-item -ErrorAction Stop
+            # $certificate = [System.Convert]::ToBase64String( [System.Text.Encoding]::UTF8.GetBytes($data))
 
         #     if ( $certificate.Length -eq 0 )
         #     {
@@ -168,19 +169,34 @@ function Import-PECertificate
         #     }
         # }
 
-        $params=@{}
+        # $params=@{}
+        # $params.CertificateType = "1"
 
-            # $passphrase = $(ConvertTo-SecureString  ([System.Web.Security.Membership]::GeneratePassword(32,3)) -AsPlainText  -Force)
-            $passphrase = Get-Random
-            $Secpassphrase = $(ConvertTo-SecureString  $passphrase -AsPlainText  -Force)
-            $CertFile = Export-PfxCertificate -Cert $certificate -Password $Secpassphrase -FilePath "$env:temp\TempCert.pfx"
-            $params.SSLCertificateFile = $CertFile.FullName
-            $params.Passphrase = $passphrase
+        # $params.SSLCertificateFile = $certificate
 
-        if ($certificate) {
-            $PEMCertificate = Convert-CertificateToPEM -Certificate $certificate
-            $params.SSLCertificateFile = "$($PEMCertificate.Public + $PEMCertificate.Private)"
-        }
+
+        # $PEMCertificate = Convert-CertificateToPEM -Certificate $certificate
+        # $params.SSLCertificateFile = [Convert]::ToBase64String("$($PEMCertificate.Public + $PEMCertificate.Private)")
+
+        # $iCardService = Get-CimInstance -CimSession $iDRACsession -ResourceUri "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/root/dcim/DCIM_iDRACCardService" -Namespace "root/dcim"
+        # Invoke-CimMethod -CimSession $iDRACsession -InputObject $iCardService -MethodName 'ImportSSLCertificate' -Arguments $params
+
+
+
+        #     # $passphrase = $(ConvertTo-SecureString  ([System.Web.Security.Membership]::GeneratePassword(32,3)) -AsPlainText  -Force)
+        #     $passphrase = Get-Random
+        #     $Secpassphrase = $(ConvertTo-SecureString  $passphrase -AsPlainText  -Force)
+        #     $CertFile = Export-PfxCertificate -Cert $certificate -Password $Secpassphrase -FilePath "$env:temp\TempCert.pfx"
+
+        #     $pfxBytes = [System.IO.File]::ReadAllBytes($CertFile.FullName)
+        #     $pfxBytes = get-content $CertFile.FullName -raw
+        #     $base64Certificate = [Convert]::ToBase64String($pfxBytes)
+
+        #     $params.SSLCertificateFile = $base64Certificate
+        #     $params.Passphrase = $passphrase
+
+        # if ($certificate) {
+        # }
 
         # if ($passphrase)
         # {
@@ -189,34 +205,41 @@ function Import-PECertificate
         #     $params.Passphrase = $tempCred.GetNetworkCredential().Password
         # }
 
-        if ($webServerCertificate) {
-            $params.CertificateType = "1"
-        } elseif ($ADServiceCertificate) {
-            $params.CertificateType = "2"
-        } else {
-            $params.CertificateType = "3"
-        }
+        # if ($webServerCertificate) {
+        #     $params.CertificateType = "1"
+        # } elseif ($ADServiceCertificate) {
+        #     $params.CertificateType = "2"
+        # } else {
+        #     $params.CertificateType = "3"
+        # }
 
 
+        # http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/root/dcim/DCIM_iDRACCardService
+
+        # $certdata = get-content $CertFile.FullName -raw
+        # $iCardService = Get-CimInstance -CimSession $iDRACsession -ResourceUri "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/root/dcim/DCIM_iDRACCardService" -Namespace "root/dcim"
+        # Invoke-CimMethod -CimSession $iDRACsession -InputObject $iCardService -MethodName 'ImportSSLCertificate' -Arguments @{SSLCertificateFile=$certdata;CertificateType=1}
+
+        # Invoke-CimMethod -CimSession $iDRACsession -InputObject $iCardService -MethodName 'ExportSSLCertificate'
 
         # $result = Invoke-CimMethod -CimSession $session -InputObject $iCardService -MethodName 'ImportSSLCertificate' -Arguments @{SSLCertificateFile=$certdata;CertificateType=1}
 
     }
     Process {
 
-        Write-Verbose "Importing Certificate to $($iDRACsession.ComputerName)`n$($Params | Format-List | Out-String)"
-        $responseData = Invoke-CimMethod -InputObject $instance -MethodName ImportSSLCertificate -CimSession $iDRACsession -Arguments $params #2>&1
-        $responseData
-        if ($responseData.ReturnValue -eq 4096) {
-            if ($Passthru) {
-                $responseData
-            } elseif ($Wait) {
-                Wait-PEConfigurationJob -iDRACSession $iDRACsession -JobID $responseData.Job.EndpointReference.InstanceID -Activity "Configuring Standard Schema Settings for $($iDRACsession.ComputerName)"
-                Write-Verbose "Imported Certificate to $($iDRACsession.ComputerName) successfully"
-            }
-        } else {
-            Throw "Certificate Import to $($iDRACsession.ComputerName) failed with error: $($responseData.Message)"
-        }
+        # Write-Verbose "Importing Certificate to $($iDRACsession.ComputerName)`n$($Params | Format-List | Out-String)"
+        # $responseData = Invoke-CimMethod -InputObject $instance -MethodName 'ImportSSLCertificate' -CimSession $iDRACsession -Arguments $params #2>&1
+        # $responseData
+        # if ($responseData.ReturnValue -eq 4096) {
+        #     if ($Passthru) {
+        #         $responseData
+        #     } elseif ($Wait) {
+        #         Wait-PEConfigurationJob -iDRACSession $iDRACsession -JobID $responseData.Job.EndpointReference.InstanceID -Activity "Configuring Standard Schema Settings for $($iDRACsession.ComputerName)"
+        #         Write-Verbose "Imported Certificate to $($iDRACsession.ComputerName) successfully"
+        #     }
+        # } else {
+        #     Throw "Certificate Import to $($iDRACsession.ComputerName) failed with error: $($responseData.Message)"
+        # }
     }
 }
 
