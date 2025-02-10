@@ -42,6 +42,7 @@ task Init {
     Set-Location $ProjectRoot
     "Build System Details:"
     Get-Item ENV:BH*
+
     "`n"
 }
 
@@ -134,7 +135,7 @@ task Deploy Build, {
         FeedUrl = $env:FeedUrl
         ApiKey = $env:ApiKey
     }
-    if ($env:Beta) {
+    if ($env:BHBuildBeta) {
         $Params.Beta = $true
     }
 
@@ -167,7 +168,7 @@ task Deploy Build, {
     git add $env:BHPSModuleManifest
     Start-Sleep -Seconds 1
     $BuildVersion = $env:Version
-    if ($env:Beta) {
+    if ($env:BHBuildBeta) {
         $BuildVersion = "$BuildVersion-Beta"
     }
     $commitTitle = "Build Version $BuildVersion"
