@@ -1,8 +1,29 @@
 param(
-    $Task = 'Build' # build is the default task, add support to deploy later
+    [String]
+    $Task    = 'Build' # build is the default task, add support to deploy later
+    ,
+    [String]
+    $FeedUrl = $Credentials.NuGet.UserName
+    ,
+    [String]
+    $ApiKey  = $Credentials.NuGet.GetNetworkCredential().Password
+    ,
+    [Switch]
+    $Beta
+    ,
+    [Switch]
+    $Major
+    ,
+    [Switch]
+    $Minor
 )
 
+$env:FeedUrl = $FeedUrl
+$env:ApiKey  = $ApiKey
+$env:Beta    = $Beta
+
 # dependencies
+Import-Module  -Name PackageManagement
 Get-PackageProvider -Name NuGet -ForceBootstrap | Out-Null
 if(-not (Get-Module -ListAvailable PSDepend))
 {

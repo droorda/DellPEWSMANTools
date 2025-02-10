@@ -1,0 +1,69 @@
+RACVMCLI(8)                                                       RACVMCLI(8)
+
+
+
+NAME
+       racvmcli - virtual media CLI for Dell's Remote Access Controller (RAC)
+
+
+SYNOPSIS
+       racvmcli [command-options]
+
+
+DESCRIPTION
+       racvmcli provides a virtual media command line  interface  for  client
+       workstations, that works with the Dell Remote Access Controller (RAC),
+       version 4 or later.  racvmcli allows the RAC host  machine  to  access
+       the client workstation's removable media devices or image files, as if
+       they were local to the RAC host.
+
+       racvmcli  accepts  several  options  to  control  its   actions   (see
+       'OPTIONS').
+
+       The  racvmcli  packaging  includes a sample script named vmdeploy that
+       illustrates how the racvmcli and  racadm  utilities  can  be  used  to
+       remotely  deploy  patches,  or initiate OS deployment, for one or more
+       target RAC hosts.  Use the script as-is, or tailor it for your  needs.
+
+
+OPTIONS
+       -r RAC-IP-addr[:RAC-SSL-port]
+              the TCP/IP address or hostname of the RAC, and SSL port number.
+              The optional SSL-port number is only needed if the RAC has  had
+              its default SSL port (443) changed.
+
+       -u RAC-user
+              specify  the  RAC  user under whose authority the Virtual Media
+              tasks shall be performed.  If this value contains  any  special
+              shell characters, you must use the shell-defined escaping mech-
+              anism for those characters.
+
+       -p RAC-user-password
+              specify the RAC user's password.  If this value  contains  spe-
+              cial  shell characters, you must use the shell-defined escaping
+              mechanism for those characters.
+
+       -f {floppy-dev|disk-image}
+              specify a floppy/disk  device  or  disk  image  file  with  the
+              floppy/disk  media.  Omit this parameter to disable the virtual
+              floppy.
+
+       -c {cdrom-dev|ISO-image}
+              specify a CD/DVD device or ISO image file to provide the CD  or
+              DVD  media.  Omit this parameter to disable the virtual CD/DVD-
+              ROM.
+
+       -h     display the usage statement. The  -h  option  takes  precedence
+              over all other options.
+
+       -v     list  the  program version.  If -v is the only option, the pro-
+              gram exits.
+
+       -m     displays the program's manual page.
+
+       -e     setup and use an SSL-encrypted channel for  the  Virtual  Media
+              data transfers.
+
+
+
+racvmcli                     2005/02/11 13:41:29                  RACVMCLI(8)
