@@ -53,34 +53,16 @@ function New-PEDRACSession
         $cimOptions   = New-CimSessionOption @Params
     }
 
-    Process
-    {
-        # Write-Verbose "Creating iDRAC session..."
+    Process {
+        Write-Verbose "Creating iDRAC session..."
 
-        if ($PSCmdlet.ShouldProcess($ComputerName,'Create iDRAC session'))
-        {
-            try
-            {
+        if ($PSCmdlet.ShouldProcess($ComputerName,'Create iDRAC session')) {
+            try {
                 $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $OperationTimeoutSec -ErrorAction Stop
             } catch {
-                try {
-                    Write-Verbose $_.exception.message
-                    $cimOptions | out-string | write-Verbose
-                    Start-Sleep -s 10
-                    $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $OperationTimeoutSec -ErrorAction Stop
-                } catch {
-                    try {
-                        Write-Warning $_.exception.message
-                        Start-Sleep -s 10
-                        $session = New-CimSession -Authentication Basic -Credential $Credential -ComputerName $ComputerName -Port 443 -SessionOption $cimOptions -OperationTimeoutSec $OperationTimeoutSec -ErrorAction Stop
-                    } catch {
-                        # Throw "New-PEDRACSession Failed : $($_.Exception.Message)"
-                        $PSCmdlet.ThrowTerminatingError($_)
-                    }
-                }
+                Write-Error -Message $_
             }
-            if ($session)
-            {
+            if ($session) {
                 $sysInfo = Get-PESystemInformation -iDRACSession $Session
                 Add-Member -inputObject $Session -Name SystemGeneration -Value $([int](([regex]::Match($sysInfo.SystemGeneration,'\d+')).groups[0].Value)) -MemberType NoteProperty
                 Add-Member -inputObject $Session -Name SystemType -Value $([regex]::Match($sysInfo.SystemGeneration,'(?<=\s).*').groups[0].Value) -MemberType NoteProperty
@@ -89,8 +71,7 @@ function New-PEDRACSession
         }
     }
 
-    End
-    {
+    End {
 
     }
 }
