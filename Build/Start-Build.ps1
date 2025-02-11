@@ -25,8 +25,7 @@ $env:BHBuildBeta = $Beta
 # dependencies
 Import-Module  -Name PackageManagement
 Get-PackageProvider -Name NuGet -ForceBootstrap | Out-Null
-if(-not (Get-Module -ListAvailable PSDepend))
-{
+if (-not (Get-Module -ListAvailable PSDepend)) {
     & (Resolve-Path "$PSScriptRoot\helpers\Install-PSDepend.ps1")
 }
 Import-Module PSDepend

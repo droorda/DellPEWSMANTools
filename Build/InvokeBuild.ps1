@@ -113,10 +113,7 @@ task Build Test, {
         }
 
         $env:Version  = New-Object System.Version ($VerMajor, $VerMinor, $VerBuild, $VerRevision)
-        # write-Verbose "BHProjectName      - $env:BHProjectName" -Verbose
         write-Verbose "Version            - $env:Version" -Verbose
-        # write-Verbose "BHPSModuleManifest - $env:BHPSModuleManifest" -Verbose
-
         Update-Metadata -Path $env:BHPSModuleManifest -PropertyName ModuleVersion -Value $env:Version -ErrorAction stop
     }
     Catch
@@ -140,48 +137,17 @@ task Deploy Build, {
         $Params.Beta = $true
     }
 
-    . C:\Projects\droorda\PSPostMan\PSPostMan.ps1
+    . C:\Projects\droorda\PSPostMan\Invoke-PSDeploy.ps1
+    . C:\Projects\droorda\PSPostMan\Push-BuildManifest.ps1
     Invoke-PSDeploy @Verbose @Params
 
-    Write-Host "Checking $Repository" -ForegroundColor Cyan
-    $GitStatus = Get-GitStatus
-    if ($GitStatus.AheadBy -gt 0) {
-        Write-Host "  Pushing changes" -ForegroundColor Magenta
-        git push #| Write-Verbose
+    $Params = @{
+        Repository = $ProjectRoot
+        BHPSModuleManifest = $env:BHPSModuleManifest
+        BuildVersion = $env:Version
+        Beta = [System.Convert]::ToBoolean($env:BHBuildBeta)
     }
-    if ($GitStatus.BehindBy -gt 0) {
-        Write-Host "Your branch is behind '$($GitStatus.Upstream)' by $($GitStatus.BehindBy) commits" -ForegroundColor Magenta
-        if ($GitStatus.Working) {
-            Write-Host "  Stashing current changes" -ForegroundColor Magenta
-            git stash save "Automated Stash during pull" --include-untracked #| Write-Verbose
-            Write-Host "  Pulling branch changes" -ForegroundColor Magenta
-            git pull #| Write-Verbose
-            # git stash list # By default, git stash pop will re-apply the most recently created stash: stash@{0}
-            Write-Host "  Re-applying stashed changes" -ForegroundColor Magenta
-            git stash pop #| Write-Verbose
-            Start-Sleep -Seconds 1
-        } else {
-            Write-Host "  Pulling branch changes" -ForegroundColor Magenta
-            git pull #| Write-Verbose
-        }
-        $GitStatus = Get-GitStatus
-    }
-    git add $env:BHPSModuleManifest
-    Start-Sleep -Seconds 1
-    $BuildVersion = $env:Version
-    if ([System.Convert]::ToBoolean($env:BHBuildBeta)) {
-        $BuildVersion = "$BuildVersion-Beta"
-    }
-    $commitTitle = "Build Version $BuildVersion"
-    $commitDescription = "[$env:computername] $((Get-Date).ToString('yyyy:MM:dd-HH:mm:ss'))"
-    Write-Host "  Commiting '$commitTitle'" -ForegroundColor Magenta
-    git commit -m $commitTitle -m $commitDescription
-    git tag "Build-$BuildVersion"
-    $GitStatus = Get-GitStatus
-    if ($GitStatus.AheadBy -gt 0) {
-        Write-Host "  Pushing changes" -ForegroundColor Magenta
-        git push #| Write-Verbose
-    }
+    Push-BuildManifest @Verbose @Params
 
 
     # Write-Host "Creating Nuget package" -ForegroundColor Cyan
