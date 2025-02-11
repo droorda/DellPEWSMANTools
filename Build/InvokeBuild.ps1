@@ -120,9 +120,9 @@ task Build Test, {
             $VerBuild = 0
         }
 
-        $script:Version  = New-Object System.Version ($VerMajor, $VerMinor, $VerBuild, $VerRevision)
-        Write-Host "Update-Metadata Version - $Version" -ForegroundColor Cyan
-        Update-Metadata -Path $env:BHPSModuleManifest -PropertyName ModuleVersion -Value $Version -ErrorAction stop
+        $Script:Version  = New-Object System.Version ($VerMajor, $VerMinor, $VerBuild, $VerRevision)
+        Write-Host "Update-Metadata Version - $Script:Version" -ForegroundColor Cyan
+        Update-Metadata -Path $env:BHPSModuleManifest -PropertyName ModuleVersion -Value $Script:Version -ErrorAction stop
     } Catch {
         "Failed to update version for '$env:BHProjectName': $_.`nContinuing with existing version"
     }
@@ -151,7 +151,7 @@ task Deploy Build, {
     $Params = @{
         Repository = $ProjectRoot
         BHPSModuleManifest = $env:BHPSModuleManifest
-        BuildVersion = $Version
+        BuildVersion = $Script:Version
         Beta = $Beta
     }
     Write-Verbose "Push-BuildManifest`n$($Params | Format-Table | Out-String)"
