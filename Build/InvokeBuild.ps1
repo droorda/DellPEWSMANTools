@@ -14,7 +14,7 @@ param(
     [String]
     $FeedUrl
     ,
-    [String]
+    [securestring]
     $ApiKey
     ,
     [Switch]
@@ -120,8 +120,8 @@ task Build Test, {
             $VerBuild = 0
         }
 
-        $Version  = New-Object System.Version ($VerMajor, $VerMinor, $VerBuild, $VerRevision)
-        write-Verbose "Version            - $Version" -Verbose
+        $script:Version  = New-Object System.Version ($VerMajor, $VerMinor, $VerBuild, $VerRevision)
+        Write-Host "Update-Metadata Version - $Version" -ForegroundColor Cyan
         Update-Metadata -Path $env:BHPSModuleManifest -PropertyName ModuleVersion -Value $Version -ErrorAction stop
     } Catch {
         "Failed to update version for '$env:BHProjectName': $_.`nContinuing with existing version"
@@ -138,11 +138,11 @@ task Deploy Build, {
         Path = $ProjectRoot
         # Force = $true
         # Recurse = $false # We keep psdeploy artifacts, avoid deploying those : )
-        FeedUrl = $env:FeedUrl
-        ApiKey = $env:ApiKey
+        FeedUrl = $FeedUrl
+        ApiKey  = $ApiKey
     }
     if ($Beta) {
-        Write-Verbose "Setting Beta flag [$Beta]"
+        Write-Warning "Setting Beta flag [$Beta]"
         $Params.Beta = $true
     }
 
@@ -154,36 +154,6 @@ task Deploy Build, {
         BuildVersion = $Version
         Beta = $Beta
     }
-
-    # Push-BuildManifest @Verbose @Params
-
-    # Write-Host "Creating Nuget package" -ForegroundColor Cyan
-    # $ModulePackage = New-PMModulePackage -Verbose -PassThru -Path "$ProjectRoot\$(split-path $ProjectRoot -Leaf)"
-    # # $ModulePackage = Move-Item -path $ModulePackage -Destination "$ProjectRoot\Builds" -PassThru
-    # Write-Host "Signing Nuget package" -ForegroundColor Cyan
-    # $Certificate = Get-ChildItem -Path Cert:\CurrentUser\My -CodeSigningCert | Where-Object {$_.NotAfter -gt (Get-date)}| Sort-Object NotAfter -Descending | Select-Object -First 1
-
-    # Set-PMPackageCert `
-    #     -path $ModulePackage.fullname `
-    #     -CertificateFingerprint $Certificate.Thumbprint `
-    #     -Timestamper 'http://sha256timestamp.ws.symantec.com/sha256/timestamp' `
-    #     -Verbose
-    # Write-Host "Publishing Nuget package" -ForegroundColor Cyan
-    # Publish-PMPackage `
-    #     -Path $ModulePackage.fullname `
-    #     -FeedUrl 'https://NuGET.dev.iconic-it.com/Nuget' `
-    #     -ApiKey '9DqH$EE3PLRT6DsW5!#3qcpq3VcJY!ZGk9Pr6ch7^XhH4mn5HKgT8pT3kpWv!7K' `
-    #     -Verbose
-    # # Get-ChildItem "$ProjectRoot\Builds" | Sort-Object Name
-    # Remove-Item -Path $ModulePackage -Force
-    # Try
-    # {
-    #     # $Version = Get-NextPSGalleryVersion -Name $env:BHProjectName -ErrorAction Stop
-    #     Update-Metadata -Path $env:BHPSModuleManifest -PropertyName FunctionsToExport -Value '*' -ErrorAction stop
-    # }
-    # Catch
-    # {
-    #     "Failed to set FunctionsToExport for '$env:BHProjectName': $_.`nContinuing with existing version"
-    # }
-
+    Write-Verbose "Push-BuildManifest`n$($Params | Format-Table | Out-String)"
+    Push-BuildManifest @Verbose @Params
 }

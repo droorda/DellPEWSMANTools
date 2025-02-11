@@ -5,8 +5,8 @@ param(
     [String]
     $FeedUrl = $Credentials.NuGet.UserName
     ,
-    [String]
-    $ApiKey  = $Credentials.NuGet.GetNetworkCredential().Password
+    [securestring]
+    $ApiKey  = $Credentials.NuGet.Password
     ,
     [Switch]
     $Beta
@@ -23,12 +23,6 @@ if ($Major) {Write-Host "  Major Version" -ForegroundColor Cyan}
 if ($Minor) {Write-Host "  Minor Version" -ForegroundColor Cyan}
 if ($Beta ) {Write-Host "  Beta Build"    -ForegroundColor Cyan}
 
-# $global:BHFeedUrl = $FeedUrl
-# $global:BHApiKey  = $ApiKey
-# $global:BHBuildBeta = $Beta
-# $global:BHMajor = $Major
-# $global:BHMinor = $Minor
-
 # dependencies
 Import-Module  -Name PackageManagement
 Get-PackageProvider -Name NuGet -ForceBootstrap | Out-Null
@@ -40,4 +34,4 @@ $null = Invoke-PSDepend -Path "$PSScriptRoot\build.requirements.psd1" -Install -
 
 Set-BuildEnvironment -Force
 
-Invoke-Build -File $PSScriptRoot\InvokeBuild.ps1 -Task $Task
+Invoke-Build -File $PSScriptRoot\InvokeBuild.ps1 -Task $Task -FeedUrl $FeedUrl -ApiKey $ApiKey -Beta:$Beta -Major:$Major -Minor:$Minor

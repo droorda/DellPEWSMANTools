@@ -22,7 +22,7 @@ This software is licensed to you under the GNU General Public License, version 2
 RootModule = 'DellPEWSMANTools.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.2.6.33'
+ModuleVersion = '1.2.6.34'
 
 # ID used to uniquely identify this module
 GUID = 'f7bf7c3e-9052-4382-ba89-b49b8201d1b4'
