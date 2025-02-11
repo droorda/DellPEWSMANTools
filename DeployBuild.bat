@@ -9,12 +9,12 @@ IF /i "%Branch%"=="local" goto ReleaseStandard
 IF /i "%Branch%"=="internal" goto ReleaseStandard
 
 :ReleaseBeta
-echo "Beta Build"
+echo "Starting Beta Build"
 powershell.exe -inputformat none -ExecutionPolicy Bypass -NonInteractive -command "& .\Build\Start-Build.ps1 -Beta %*"
 goto commonexit
 
 :ReleaseStandard
-echo "Standard Build"
+echo "Starting Standard Build"
 powershell.exe -inputformat none -ExecutionPolicy Bypass -NonInteractive -command "& .\Build\Start-Build.ps1 %*"
 goto commonexit
 

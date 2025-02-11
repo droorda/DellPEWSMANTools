@@ -135,7 +135,8 @@ task Deploy Build, {
         FeedUrl = $env:FeedUrl
         ApiKey = $env:ApiKey
     }
-    if ($env:BHBuildBeta) {
+    if ([System.Convert]::ToBoolean($env:BHBuildBeta)) {
+        Write-Verbose "Setting Beta flag [$env:BHBuildBeta]"
         $Params.Beta = $true
     }
 
@@ -168,7 +169,7 @@ task Deploy Build, {
     git add $env:BHPSModuleManifest
     Start-Sleep -Seconds 1
     $BuildVersion = $env:Version
-    if ($env:BHBuildBeta) {
+    if ([System.Convert]::ToBoolean($env:BHBuildBeta)) {
         $BuildVersion = "$BuildVersion-Beta"
     }
     $commitTitle = "Build Version $BuildVersion"
