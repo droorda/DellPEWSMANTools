@@ -18,9 +18,16 @@ param(
     $Minor
 )
 
-$env:FeedUrl = $FeedUrl
-$env:ApiKey  = $ApiKey
-$env:BHBuildBeta = $Beta
+Write-Host "Starting $Task" -ForegroundColor Cyan
+if ($Major) {Write-Host "  Major Version" -ForegroundColor Cyan}
+if ($Minor) {Write-Host "  Minor Version" -ForegroundColor Cyan}
+if ($Beta ) {Write-Host "  Beta Build"    -ForegroundColor Cyan}
+
+# $global:BHFeedUrl = $FeedUrl
+# $global:BHApiKey  = $ApiKey
+# $global:BHBuildBeta = $Beta
+# $global:BHMajor = $Major
+# $global:BHMinor = $Minor
 
 # dependencies
 Import-Module  -Name PackageManagement

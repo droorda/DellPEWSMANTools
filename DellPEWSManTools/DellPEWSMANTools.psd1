@@ -22,7 +22,7 @@ This software is licensed to you under the GNU General Public License, version 2
 RootModule = 'DellPEWSMANTools.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.2.3.11'
+ModuleVersion = '1.2.4.12'
 
 # ID used to uniquely identify this module
 GUID = 'f7bf7c3e-9052-4382-ba89-b49b8201d1b4'
@@ -103,7 +103,7 @@ Description = 'PowerShell Tools for managing Dell EMC PowerEdge Servers using WS
 # NestedModules = @()
 
 # Functions to export from this module
-FunctionsToExport = '*'
+FunctionsToExport = @('Add-PELCLogComment','Add-PELCWorkNote','Approve-PESupportAssistEULA','Backup-PEServerImage','Clear-PEForeignConfiguration','Clear-PERAIDConfiguration','Clear-PESupportAssistAutoCollectSchedule','Clear-PESystemJob','Connect-PERFSISOImage','Disconnect-PERFSISOImage','Dismount-PEDriverPack','Dismount-PEISOImage','Export-PEHardwareInventory','Export-PELastSupportAssistCollection','Export-PEServerConfigurationProfile','Export-PESupportAssistCollection','Export-PETechSupportReport','Find-PEDRAC','Get-PEADGroupInfo','Get-PEAvailableDisk','Get-PEBIOSAttribute','Get-PEBootOrder','Get-PEConfigurationJobStatus','Get-PEConfigurationResult','Get-PEConfigurationShare','Get-PECPU','Get-PEDRACAttribute','Get-PEDRACInformation','Get-PEDRACPrivilege','Get-PEDRACUser','Get-PEDriverPackInformation','Get-PEEnclosure','Get-PEFan','Get-PEHostMACInformation','Get-PEImageAttachStatus','Get-PELCAttribute','Get-PELCLog','Get-PELCState','Get-PEMemory','Get-PENetworkDevice','Get-PENetworkDeviceAttribute','Get-PENetworkDeviceCapability','Get-PENetworkDeviceStatistic','Get-PENetworkISOImageConnectionInformation','Get-PEPCIeSSDBackPlane','Get-PEPCIeSSDExtender','Get-PEPhysicalDisk','Get-PEPowerState','Get-PEPowerSupply','Get-PERAIDEnumeration','Get-PESoftwareInventory','Get-PESoftwareUpdate','Get-PEStorageController','Get-PESupportAssistAutoCollectSchedule','Get-PESupportAssistEULAStatus','Get-PESystemAttribute','Get-PESystemInformation','Get-PESystemOneTimeBootSetting','Get-PESystemRepositoryBasedUpdateList','Get-PEUpdatesFromCatalog','Get-PEVirtualDisk','Import-PEServerConfigurationProfile','Invoke-PESupportAssistUploadLastCollection','Mount-PEDriverPack','New-DRACFirmwareJob','New-PEBIOSConfigJob','New-PEBIOSConfigurationJob','New-PEConfigurationJob','New-PEDRACConfigurationJob','New-PEDRACSession','New-PEJobQueue','New-PERebootJobForSWUpdate','New-PESystemConfigurationJob','New-PESystemJob','New-PESystemRebootJob','New-PETargetedConfigurationJob','Register-PESupportAssist','Remove-PEVirtualDisk','Reset-PEDRAC','Set-PEADRoleGroup','Set-PEAutobackupSchedule','Set-PEBIOSAttribute','Set-PEBootToHD','Set-PEBootToNetworkISO','Set-PEBootToPXE','Set-PECommonADSetting','Set-PEDRACAttribute','Set-PEDRACUser','Set-PELCAttribute','Set-PEPowerState','Set-PESkipISOImageBoot','Set-PEStandardSchemaSetting','Set-PESupportAssistAutoCollectSchedule','Set-PESystemAttribute','Set-PESystemOneTimeBootSetting','Update-PEOSAppHealthData','Update-PESystemFromRepository','Wait-PEConfigurationJob')
 
 # Cmdlets to export from this module
 CmdletsToExport = '*'

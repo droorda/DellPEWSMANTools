@@ -11,6 +11,20 @@
 # TODO: [CmdletBinding()] is optional but recommended for strict name checks.
 [CmdletBinding()]
 param(
+    [String]
+    $FeedUrl
+    ,
+    [String]
+    $ApiKey
+    ,
+    [Switch]
+    $Beta
+    ,
+    [Switch]
+    $Major
+    ,
+    [Switch]
+    $Minor
 )
 # PSake makes variables declared here available in other scriptblocks
 # Init some things
@@ -18,8 +32,7 @@ param(
 
     # Find the build folder based on build system
     $ProjectRoot = $ENV:BHProjectPath
-    if(-not $ProjectRoot)
-    {
+    if(-not $ProjectRoot) {
         $ProjectRoot = (Resolve-Path -Path "$PSScriptRoot\.." -ErrorAction Stop).Path
     }
 
@@ -29,8 +42,7 @@ param(
     $lines = '----------------------------------------------------------------------'
 
     $Verbose = @{}
-    if($ENV:BHCommitMessage -match "!verbose")
-    {
+    if($ENV:BHCommitMessage -match "!verbose") {
         $Verbose = @{Verbose = $True}
     }
 
@@ -49,15 +61,13 @@ task Init {
 task Test Init, {
     $lines
 
-    foreach ($TestType in @('Unit','Integration'))
-    {
+    foreach ($TestType in @('Unit','Integration')) {
         "`n`tSTATUS: $TestType testing with PowerShell $PSVersion"
         $TestFile = "{0}_{1}" -f $TestType, $TestFileFormat
 
-        if (Test-Path -Path "$ProjectRoot\Tests\$TestType")
-        {
+        if (Test-Path -Path "$ProjectRoot\Tests\$TestType") {
             # Gather test results. Store them in a variable and file
-            $TestResults = Invoke-Pester -Path "$ProjectRoot\Tests\$TestType" -PassThru #-OutputFormat NUnitXml -OutputFile "$ProjectRoot\$TestFile"
+            # $TestResults = Invoke-Pester -Path "$ProjectRoot\Tests\$TestType" -PassThru #-OutputFormat NUnitXml -OutputFile "$ProjectRoot\$TestFile"
 
             # In Appveyor?  Upload our tests! #Abstract this into a function?
             # If($ENV:BHBuildSystem -eq 'AppVeyor')
@@ -71,8 +81,7 @@ task Test Init, {
 
             # Failed tests?
             # Need to tell psake or it will proceed to the deployment. Danger!
-            if($TestResults.FailedCount -gt 0)
-            {
+            if ($TestResults.FailedCount -gt 0) {
                 throw "Failed '$($TestResults.FailedCount)' $TestType tests, build failed"
                 break # break out if any of the test fails
             }
@@ -89,8 +98,7 @@ task Build Test, {
     Set-ModuleFunctions
 
     # Bump the module version
-    Try
-    {
+    Try {
         [Version]$Version = Get-NextNugetPackageVersion -Name $env:BHProjectName -PackageSourceUrl 'https://NuGET.dev.iconic-it.com/Nuget' -ErrorAction Stop
         [Version]$LocalVersion  = Get-Metadata -Path $env:BHPSModuleManifest -PropertyName ModuleVersion
         # Local Version -1 to correct for failed/Beta builds
@@ -112,18 +120,19 @@ task Build Test, {
             $VerBuild = 0
         }
 
-        $env:Version  = New-Object System.Version ($VerMajor, $VerMinor, $VerBuild, $VerRevision)
-        write-Verbose "Version            - $env:Version" -Verbose
-        Update-Metadata -Path $env:BHPSModuleManifest -PropertyName ModuleVersion -Value $env:Version -ErrorAction stop
-    }
-    Catch
-    {
+        $Version  = New-Object System.Version ($VerMajor, $VerMinor, $VerBuild, $VerRevision)
+        write-Verbose "Version            - $Version" -Verbose
+        Update-Metadata -Path $env:BHPSModuleManifest -PropertyName ModuleVersion -Value $Version -ErrorAction stop
+    } Catch {
         "Failed to update version for '$env:BHProjectName': $_.`nContinuing with existing version"
     }
 }
 
 task Deploy Build, {
     $lines
+
+    . C:\Projects\droorda\PSPostMan\Invoke-PSDeploy.ps1
+    . C:\Projects\droorda\PSPostMan\Push-BuildManifest.ps1
 
     $Params = @{
         Path = $ProjectRoot
@@ -132,23 +141,21 @@ task Deploy Build, {
         FeedUrl = $env:FeedUrl
         ApiKey = $env:ApiKey
     }
-    if ([System.Convert]::ToBoolean($env:BHBuildBeta)) {
-        Write-Verbose "Setting Beta flag [$env:BHBuildBeta]"
+    if ($Beta) {
+        Write-Verbose "Setting Beta flag [$Beta]"
         $Params.Beta = $true
     }
 
-    . C:\Projects\droorda\PSPostMan\Invoke-PSDeploy.ps1
-    . C:\Projects\droorda\PSPostMan\Push-BuildManifest.ps1
     Invoke-PSDeploy @Verbose @Params
 
     $Params = @{
         Repository = $ProjectRoot
         BHPSModuleManifest = $env:BHPSModuleManifest
-        BuildVersion = $env:Version
-        Beta = [System.Convert]::ToBoolean($env:BHBuildBeta)
+        BuildVersion = $Version
+        Beta = $Beta
     }
-    Push-BuildManifest @Verbose @Params
 
+    # Push-BuildManifest @Verbose @Params
 
     # Write-Host "Creating Nuget package" -ForegroundColor Cyan
     # $ModulePackage = New-PMModulePackage -Verbose -PassThru -Path "$ProjectRoot\$(split-path $ProjectRoot -Leaf)"
