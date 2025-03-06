@@ -11,7 +11,7 @@ $ScriptPath = split-path $Script:MyInvocation.MyCommand.Path -parent
 function Invoke-RacAdm {
     [CmdletBinding()]
     Param(
-        $racexe            = "$ScriptPath\BIN\rac5\racadm.exe"
+        $racexe            = "$ScriptPath\..\..\BIN\rac5\racadm.exe"
         ,
         $DracInfo
         ,
